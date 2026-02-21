@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,10 +12,11 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options as { path?: string })
-          );
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            supabaseResponse.cookies.set(name, value, options);
+          });
         },
       },
     }
@@ -27,7 +28,7 @@ export async function updateSession(request: NextRequest) {
 
   const redirectTo = (path: string) => {
     const redirectResp = NextResponse.redirect(new URL(path, request.url));
-    response.cookies.getAll().forEach((c) =>
+    supabaseResponse.cookies.getAll().forEach((c) =>
       redirectResp.cookies.set(c.name, c.value, { path: '/' })
     );
     return redirectResp;
@@ -35,7 +36,7 @@ export async function updateSession(request: NextRequest) {
 
   // 로그인/회원가입 페이지는 인증 불필요
   if (pathname === '/login' || pathname === '/signup') {
-    return response;
+    return supabaseResponse;
   }
 
   // 보호된 경로 - 로그인 필요
@@ -45,7 +46,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 사용자가 있을 때만 처리
-  if (!user) return response;
+  if (!user) return supabaseResponse;
 
   // 관리자 체크 (DB 조회 없이 빠르게 처리)
   const isAdmin = user.email === adminEmail;
@@ -84,5 +85,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return response;
+  return supabaseResponse;
 }
