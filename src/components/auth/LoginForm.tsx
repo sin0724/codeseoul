@@ -1,0 +1,88 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { zhTW } from '@/messages/kol/zh-TW';
+import { motion } from 'framer-motion';
+
+export function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      router.push('/');
+      router.refresh();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : zhTW.loginFailed);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block text-sm font-mono text-white/80 mb-2">
+            {zhTW.email}
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded border border-white/20 bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+            placeholder="agent@codeseoul.kr"
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="block text-sm font-mono text-white/80 mb-2">
+            {zhTW.password}
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded border border-white/20 bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+          />
+        </div>
+        {error && (
+          <p className="text-sm text-[#FF0000] font-mono">{error}</p>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded bg-[#FF0000] px-4 py-3 font-mono font-bold text-white transition-colors hover:bg-[#cc0000] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? zhTW.loggingIn : zhTW.login}
+        </button>
+      </form>
+      <p className="mt-6 text-center text-sm text-white/60">
+        {zhTW.noAccount}{' '}
+        <Link href="/signup" className="text-[#FF0000] hover:underline">
+          {zhTW.signup}
+        </Link>
+      </p>
+    </motion.div>
+  );
+}

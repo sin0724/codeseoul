@@ -1,0 +1,6 @@
+-- 관리자 이메일 등록 (필수)
+-- 아래 SQL을 Supabase Dashboard > SQL Editor에서 실행하세요.
+-- 'your@email.com' 을 실제 관리자 이메일로 변경하세요.
+-- .env.local의 CODESEUL_ADMIN_EMAIL, NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL과 동일해야 합니다.
+--
+-- INSERT INTO public.admin_emails (email) VALUES ('your@email.com') ON CONFLICT (email) DO NOTHING;
