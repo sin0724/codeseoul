@@ -1,55 +1,94 @@
-import { createClient } from '@/lib/supabase/server';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import { MissionCard } from '@/components/dashboard/MissionCard';
 import { TierBadge } from '@/components/dashboard/TierBadge';
 import { DashboardPagination } from '@/components/dashboard/DashboardPagination';
 import { zhTW } from '@/messages/kol/zh-TW';
 
+import type { ProgramTier, Campaign } from '@/lib/codeseoul/types';
+
 const PAGE_SIZE = 12;
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ page?: string }>;
-}) {
-  const params = await searchParams;
-  const page = Math.max(1, parseInt(params?.page ?? '1', 10) || 1);
+interface Profile {
+  full_name?: string;
+  tier?: ProgramTier | null;
+}
+
+export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from('profiles').select('full_name, tier').eq('id', user.id).single()
-    : { data: null };
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [counts, setCounts] = useState<Record<string, { applicants: number; selected: number }>>({});
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const { data: campaigns, count } = await supabase
-    .from('campaigns')
-    .select('*', { count: 'exact' })
-    .eq('status', 'active')
-    .order('deadline', { ascending: true })
-    .range(from, to);
-
-  const campaignIds = (campaigns ?? []).map((c) => c.id);
-  const { data: applications } = campaignIds.length > 0
-    ? await supabase
-        .from('applications')
-        .select('campaign_id, status')
-        .in('campaign_id', campaignIds)
-    : { data: [] as { campaign_id: string; status: string }[] };
-
-  const counts = (applications ?? []).reduce(
-    (acc, app) => {
-      if (!acc[app.campaign_id]) {
-        acc[app.campaign_id] = { applicants: 0, selected: 0 };
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, tier')
+          .eq('id', user.id)
+          .single();
+        setProfile(profileData);
       }
-      acc[app.campaign_id].applicants += 1;
-      if (app.status === 'selected' || app.status === 'completed' || app.status === 'paid') {
-        acc[app.campaign_id].selected += 1;
+
+      const { data: campaignsData, count } = await supabase
+        .from('campaigns')
+        .select('*', { count: 'exact' })
+        .eq('status', 'active')
+        .order('deadline', { ascending: true })
+        .range(from, to);
+
+      setCampaigns((campaignsData ?? []) as Campaign[]);
+      setTotalCount(count ?? 0);
+
+      const campaignIds = (campaignsData ?? []).map((c: Campaign) => c.id);
+      if (campaignIds.length > 0) {
+        const { data: applications } = await supabase
+          .from('applications')
+          .select('campaign_id, status')
+          .in('campaign_id', campaignIds);
+
+        const newCounts = (applications ?? []).reduce(
+          (acc: Record<string, { applicants: number; selected: number }>, app: { campaign_id: string; status: string }) => {
+            if (!acc[app.campaign_id]) {
+              acc[app.campaign_id] = { applicants: 0, selected: 0 };
+            }
+            acc[app.campaign_id].applicants += 1;
+            if (app.status === 'selected' || app.status === 'completed' || app.status === 'paid') {
+              acc[app.campaign_id].selected += 1;
+            }
+            return acc;
+          },
+          {}
+        );
+        setCounts(newCounts);
       }
-      return acc;
-    },
-    {} as Record<string, { applicants: number; selected: number }>
-  );
+
+      setLoading(false);
+    };
+    fetchData();
+  }, [from, to]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -62,12 +101,12 @@ export default async function DashboardPage({
             {zhTW.dashboardDesc}
           </p>
         </div>
-        {user && (
+        {profile && (
           <div className="flex items-center gap-3">
-            {profile?.full_name && (
+            {profile.full_name && (
               <span className="text-white/80 font-mono text-sm">{profile.full_name}</span>
             )}
-            {profile?.tier ? (
+            {profile.tier ? (
               <TierBadge tier={profile.tier} size="md" />
             ) : (
               <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-mono text-white/50">
@@ -77,14 +116,14 @@ export default async function DashboardPage({
           </div>
         )}
       </div>
-      {!campaigns || campaigns.length === 0 ? (
+      {campaigns.length === 0 ? (
         <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
           <p className="text-white/50 font-mono">{zhTW.noMissions}</p>
         </div>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-            {campaigns!.map((campaign, i) => (
+            {campaigns.map((campaign, i) => (
               <MissionCard
                 key={campaign.id}
                 campaign={campaign}
@@ -96,8 +135,8 @@ export default async function DashboardPage({
           </div>
           <DashboardPagination
             page={page}
-            totalPages={Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE))}
-            totalItems={count ?? 0}
+            totalPages={Math.max(1, Math.ceil(totalCount / PAGE_SIZE))}
+            totalItems={totalCount}
             pageSize={PAGE_SIZE}
           />
         </>

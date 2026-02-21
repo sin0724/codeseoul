@@ -1,31 +1,58 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { PayoutHistoryList } from '@/components/dashboard/PayoutHistoryList';
 import { zhTW } from '@/messages/kol/zh-TW';
 
-export default async function PayoutHistoryPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+interface PaidApplication {
+  id: string;
+  applied_at: string;
+  campaign: { title: string; brand_name: string; payout_amount: number } | { title: string; brand_name: string; payout_amount: number }[];
+}
 
-  const { data: paidApplications } = await supabase
-    .from('applications')
-    .select(
-      `
-      id,
-      applied_at,
-      campaign:campaigns(title, brand_name, payout_amount)
-    `
-    )
-    .eq('kol_id', user.id)
-    .eq('status', 'paid')
-    .order('applied_at', { ascending: false });
+export default function PayoutHistoryPage() {
+  const [paidApplications, setPaidApplications] = useState<PaidApplication[]>([]);
+  const [totalPaid, setTotalPaid] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const totalPaid =
-    (paidApplications ?? []).reduce((sum, app) => {
-      const c = Array.isArray(app.campaign) ? app.campaign[0] : app.campaign;
-      return sum + (c?.payout_amount ?? 0);
-    }, 0) ?? 0;
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from('applications')
+        .select(`
+          id,
+          applied_at,
+          campaign:campaigns(title, brand_name, payout_amount)
+        `)
+        .eq('kol_id', user.id)
+        .eq('status', 'paid')
+        .order('applied_at', { ascending: false });
+
+      const apps = (data ?? []) as PaidApplication[];
+      setPaidApplications(apps);
+      
+      const total = apps.reduce((sum, app) => {
+        const c = Array.isArray(app.campaign) ? app.campaign[0] : app.campaign;
+        return sum + (c?.payout_amount ?? 0);
+      }, 0);
+      setTotalPaid(total);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -41,7 +68,7 @@ export default async function PayoutHistoryPage() {
           {totalPaid.toLocaleString()} TWD
         </p>
       </div>
-      <PayoutHistoryList items={paidApplications ?? []} />
+      <PayoutHistoryList items={paidApplications} />
     </div>
   );
 }
