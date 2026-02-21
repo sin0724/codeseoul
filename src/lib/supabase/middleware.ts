@@ -76,8 +76,15 @@ export async function updateSession(request: NextRequest) {
       if (status === 'approved' && pathname === '/') return redirectTo('/dashboard');
     }
 
-    if (pathname === '/waiting' && status === 'approved') return redirectTo('/dashboard');
-    if (pathname === '/rejected' && status === 'approved') return redirectTo('/dashboard');
+    if (pathname === '/waiting') {
+      if (status === 'approved') return redirectTo('/dashboard');
+      if (status === 'rejected') return redirectTo('/rejected');
+    }
+    
+    if (pathname === '/rejected') {
+      if (status === 'approved') return redirectTo('/dashboard');
+      if (status === 'pending') return redirectTo('/waiting');
+    }
   }
 
   return response;

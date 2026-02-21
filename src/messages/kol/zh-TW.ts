@@ -42,9 +42,10 @@ export const zhTW = {
   waitingTitle: '審核中',
   waitingDesc: '首爾總部正在驗證您的存取代碼。',
   waitingNote: '審核完成後將以郵件通知，請稍候。',
-  rejectedTitle: '申請已拒絕',
-  rejectedDesc: '很抱歉，您的存取申請未通過審核。',
-  rejectedNote: '若有疑問，請聯繫客服。',
+  rejectedTitle: '審核未通過',
+  rejectedDesc: '感謝您對 codeseoul 的關注。經審核後，目前暫時無法核准您的申請。',
+  rejectedNote: '如有任何疑問或希望重新申請，歡迎隨時與我們的客服團隊聯繫。我們將竭誠為您服務。',
+  contactSupport: '聯繫客服',
 
   // 대시보드 (신규 미션)
   dashboardTitle: '新任務',
