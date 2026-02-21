@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { zhTW } from '@/messages/kol/zh-TW';
 import { motion } from 'framer-motion';
+
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,16 +20,37 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      router.push('/');
-      router.refresh();
+      
+      const userEmail = data.user?.email;
+      
+      if (userEmail === ADMIN_EMAIL) {
+        window.location.href = '/admin/codeseoul';
+        return;
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status')
+        .eq('id', data.user.id)
+        .single();
+      
+      const status = profile?.status;
+      if (status === 'pending') {
+        window.location.href = '/waiting';
+      } else if (status === 'rejected') {
+        window.location.href = '/rejected';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : zhTW.loginFailed);
-    } finally {
       setLoading(false);
     }
   };
+
+  const isFormValid = email.trim() && password.trim();
 
   return (
     <motion.div
@@ -71,7 +92,7 @@ export function LoginForm() {
         )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !isFormValid}
           className="w-full rounded bg-[#FF0000] px-4 py-3 font-mono font-bold text-white transition-colors hover:bg-[#cc0000] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? zhTW.loggingIn : zhTW.login}
