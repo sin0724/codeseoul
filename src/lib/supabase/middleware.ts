@@ -81,6 +81,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (pathname.startsWith('/dashboard') && user) {
+    // 관리자가 /dashboard 접근 시 관리자 페이지로 리다이렉트
+    if (user.email === adminEmail) {
+      return redirectTo(new URL('/admin/codeseoul', request.url));
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('status')
@@ -94,6 +99,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (pathname === '/' && user) {
+    // 관리자는 바로 관리자 페이지로 이동
+    if (user.email === adminEmail) {
+      return redirectTo(new URL('/admin/codeseoul', request.url));
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('status')
@@ -103,7 +113,6 @@ export async function updateSession(request: NextRequest) {
     if (profile?.status === 'approved') return redirectTo(new URL('/dashboard', request.url));
     if (profile?.status === 'pending') return redirectTo(new URL('/waiting', request.url));
     if (profile?.status === 'rejected') return redirectTo(new URL('/rejected', request.url));
-    if (user.email === adminEmail) return redirectTo(new URL('/admin/codeseoul', request.url));
   }
 
   return response;
