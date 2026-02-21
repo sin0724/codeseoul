@@ -6,13 +6,14 @@ import { WaitingContent } from './WaitingContent';
 
 export default function WaitingPage() {
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = createClient();
+    
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!session) {
+      if (!user) {
         window.location.href = '/login';
         return;
       }
@@ -20,7 +21,7 @@ export default function WaitingPage() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('status')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       if (profile?.status === 'approved') {
@@ -32,7 +33,7 @@ export default function WaitingPage() {
     };
 
     checkAuth();
-  }, [supabase]);
+  }, []);
 
   if (loading) {
     return (

@@ -11,24 +11,23 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, requiredRole, adminEmail }: AuthGuardProps) {
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
-  const [profileStatus, setProfileStatus] = useState<string | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = createClient();
+    
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!session) {
+      if (!user) {
         window.location.href = '/login';
         return;
       }
 
-      const user = session.user;
+      const effectiveAdminEmail = adminEmail || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
 
       // 관리자 체크
       if (requiredRole === 'admin') {
-        const isAdmin = user.email === adminEmail || user.email === process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
-        if (!isAdmin) {
+        if (user.email !== effectiveAdminEmail) {
           window.location.href = '/dashboard';
           return;
         }
@@ -39,7 +38,7 @@ export function AuthGuard({ children, requiredRole, adminEmail }: AuthGuardProps
       // KOL 체크
       if (requiredRole === 'kol') {
         // 관리자는 admin으로 리다이렉트
-        if (user.email === adminEmail || user.email === process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL) {
+        if (user.email === effectiveAdminEmail) {
           window.location.href = '/admin/codeseoul';
           return;
         }
@@ -51,10 +50,7 @@ export function AuthGuard({ children, requiredRole, adminEmail }: AuthGuardProps
           .eq('id', user.id)
           .single();
 
-        const pStatus = profile?.status;
-        setProfileStatus(pStatus);
-
-        if (pStatus !== 'approved') {
+        if (profile?.status !== 'approved') {
           window.location.href = '/waiting';
           return;
         }
@@ -72,7 +68,7 @@ export function AuthGuard({ children, requiredRole, adminEmail }: AuthGuardProps
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, requiredRole, adminEmail]);
+  }, [requiredRole, adminEmail]);
 
   if (status === 'loading') {
     return (
