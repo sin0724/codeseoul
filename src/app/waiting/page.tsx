@@ -1,11 +1,38 @@
 'use client';
 
+import { useEffect } from 'react';
 import { CodeseoulLayout } from '@/components/layout/CodeseoulLayout';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { zhTW } from '@/messages/kol/zh-TW';
+import { createClient } from '@/lib/supabase/client';
 
 export default function WaitingPage() {
+  useEffect(() => {
+    const checkStatus = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.status === 'approved') {
+        window.location.href = '/dashboard';
+      } else if (profile?.status === 'rejected') {
+        window.location.href = '/rejected';
+      }
+    };
+    
+    checkStatus();
+  }, []);
+
   return (
     <CodeseoulLayout>
       <motion.div
