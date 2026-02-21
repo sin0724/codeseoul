@@ -2,8 +2,10 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   });
 
   const supabase = createServerClient(
@@ -11,25 +13,23 @@ export async function updateSession(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
+        get(name: string) {
+          return request.cookies.get(name)?.value;
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
+        set(name: string, value: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value, ...options });
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value: '', ...options });
+          response.cookies.set({ name, value: '', ...options });
         },
       },
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
 
   const pathname = request.nextUrl.pathname;
   const adminEmail = process.env.CODESEUL_ADMIN_EMAIL || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   const redirectTo = (path: string) => {
     const url = new URL(path, request.url);
     const redirectResponse = NextResponse.redirect(url);
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
+    response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value);
     });
     return redirectResponse;
@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
 
   // 로그인/회원가입 페이지는 인증 불필요
   if (pathname === '/login' || pathname === '/signup') {
-    return supabaseResponse;
+    return response;
   }
 
   // 보호된 경로 - 로그인 필요
@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 사용자가 있을 때만 처리
-  if (!user) return supabaseResponse;
+  if (!user) return response;
 
   // 관리자 체크 (DB 조회 없이 빠르게 처리)
   const isAdmin = user.email === adminEmail;
@@ -94,5 +94,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return supabaseResponse;
+  return response;
 }
