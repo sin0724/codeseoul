@@ -2,9 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({
-    request,
-  });
+  let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,96 +21,63 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   const pathname = request.nextUrl.pathname;
+  const adminEmail = process.env.CODESEUL_ADMIN_EMAIL || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
 
-  // Public routes
-  const isAuthPage = pathname === '/login' || pathname === '/signup';
-  const isWaitingPage = pathname === '/waiting';
-  const isRejectedPage = pathname === '/rejected';
-
-  const redirectTo = (url: URL) => {
-    const redirectResp = NextResponse.redirect(url);
+  const redirectTo = (path: string) => {
+    const redirectResp = NextResponse.redirect(new URL(path, request.url));
     response.cookies.getAll().forEach((c) =>
       redirectResp.cookies.set(c.name, c.value, { path: '/' })
     );
     return redirectResp;
   };
 
-  if (isAuthPage || isWaitingPage || isRejectedPage) {
-    if (user && !isAuthPage) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('status')
-        .eq('id', user.id)
-        .single();
-
-      if (profile) {
-        if (profile.status === 'approved' && (isWaitingPage || isRejectedPage)) {
-          return redirectTo(new URL('/dashboard', request.url));
-        }
-        if (profile.status === 'rejected' && !isRejectedPage && !isAuthPage) {
-          return redirectTo(new URL('/rejected', request.url));
-        }
-        if (profile.status === 'pending' && !isWaitingPage && !isAuthPage) {
-          return redirectTo(new URL('/waiting', request.url));
-        }
-      }
-    }
+  // 로그인/회원가입 페이지는 인증 불필요
+  if (pathname === '/login' || pathname === '/signup') {
+    return response;
   }
 
-  // Protected routes - require login
-  const isProtectedRoute =
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/admin') ||
-    pathname === '/';
-
-  const adminEmail = process.env.CODESEUL_ADMIN_EMAIL || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
-
+  // 보호된 경로 - 로그인 필요
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname === '/';
   if (isProtectedRoute && !user) {
-    return redirectTo(new URL('/login', request.url));
+    return redirectTo('/login');
   }
 
-  if (pathname.startsWith('/admin/codeseoul') && user && user.email !== adminEmail) {
-    return redirectTo(new URL('/dashboard', request.url));
+  // 사용자가 있을 때만 처리
+  if (!user) return response;
+
+  // 관리자 체크 (DB 조회 없이 빠르게 처리)
+  const isAdmin = user.email === adminEmail;
+
+  // 관리자 페이지 접근 제한
+  if (pathname.startsWith('/admin/codeseoul') && !isAdmin) {
+    return redirectTo('/dashboard');
   }
 
-  if (pathname.startsWith('/dashboard') && user) {
-    // 관리자가 /dashboard 접근 시 관리자 페이지로 리다이렉트
-    if (user.email === adminEmail) {
-      return redirectTo(new URL('/admin/codeseoul', request.url));
-    }
+  // 관리자는 dashboard 대신 admin으로
+  if (isAdmin && (pathname.startsWith('/dashboard') || pathname === '/')) {
+    return redirectTo('/admin/codeseoul');
+  }
 
+  // KOL: profile 조회가 필요한 경우만 (관리자 제외)
+  if (!isAdmin && (pathname.startsWith('/dashboard') || pathname === '/' || pathname === '/waiting' || pathname === '/rejected')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('status')
       .eq('id', user.id)
       .single();
 
-    if (profile && profile.status !== 'approved') {
-      if (profile.status === 'pending') return redirectTo(new URL('/waiting', request.url));
-      if (profile.status === 'rejected') return redirectTo(new URL('/rejected', request.url));
-    }
-  }
+    const status = profile?.status;
 
-  if (pathname === '/' && user) {
-    // 관리자는 바로 관리자 페이지로 이동
-    if (user.email === adminEmail) {
-      return redirectTo(new URL('/admin/codeseoul', request.url));
+    if (pathname === '/' || pathname.startsWith('/dashboard')) {
+      if (status === 'pending') return redirectTo('/waiting');
+      if (status === 'rejected') return redirectTo('/rejected');
+      if (status === 'approved' && pathname === '/') return redirectTo('/dashboard');
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('status')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.status === 'approved') return redirectTo(new URL('/dashboard', request.url));
-    if (profile?.status === 'pending') return redirectTo(new URL('/waiting', request.url));
-    if (profile?.status === 'rejected') return redirectTo(new URL('/rejected', request.url));
+    if (pathname === '/waiting' && status === 'approved') return redirectTo('/dashboard');
+    if (pathname === '/rejected' && status === 'approved') return redirectTo('/dashboard');
   }
 
   return response;
