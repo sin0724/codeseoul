@@ -47,20 +47,32 @@ export function KOLApprovalTab() {
     setProcessingId(id);
     
     try {
-      const { error } = await supabase
+      const { error, data, count } = await supabase
         .from('profiles')
         .update({ status: 'approved' })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
+      
+      console.log('Approve result:', { error, data, count, id });
       
       if (error) {
         alert(`승인 실패: ${error.message}`);
         return;
       }
       
+      if (!data || data.length === 0) {
+        alert('승인 실패: 업데이트된 행이 없습니다. RLS 정책을 확인하세요.');
+        return;
+      }
+      
       setProfiles(prev => prev.filter(p => p.id !== id));
       setTotalCount(prev => Math.max(0, prev - 1));
       
-      await createNotification(supabase, id, 'kol_approved', '註冊已通過審核', '現在您可以申請任務了。');
+      try {
+        await createNotification(supabase, id, 'kol_approved', '註冊已通過審核', '現在您可以申請任務了。');
+      } catch (notifErr) {
+        console.warn('Notification failed:', notifErr);
+      }
     } catch (err) {
       alert(`승인 실패: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -73,20 +85,32 @@ export function KOLApprovalTab() {
     setProcessingId(id);
     
     try {
-      const { error } = await supabase
+      const { error, data, count } = await supabase
         .from('profiles')
         .update({ status: 'rejected' })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
+      
+      console.log('Reject result:', { error, data, count, id });
       
       if (error) {
         alert(`거절 실패: ${error.message}`);
         return;
       }
       
+      if (!data || data.length === 0) {
+        alert('거절 실패: 업데이트된 행이 없습니다. RLS 정책을 확인하세요.');
+        return;
+      }
+      
       setProfiles(prev => prev.filter(p => p.id !== id));
       setTotalCount(prev => Math.max(0, prev - 1));
       
-      await createNotification(supabase, id, 'kol_rejected', '註冊審核未通過', '如有疑問，請與我們聯繫。');
+      try {
+        await createNotification(supabase, id, 'kol_rejected', '註冊審核未通過', '如有疑問，請與我們聯繫。');
+      } catch (notifErr) {
+        console.warn('Notification failed:', notifErr);
+      }
     } catch (err) {
       alert(`거절 실패: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
