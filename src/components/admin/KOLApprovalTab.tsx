@@ -13,6 +13,7 @@ const PAGE_SIZE = 10;
 export function KOLApprovalTab() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const supabase = createClient();
@@ -41,21 +42,60 @@ export function KOLApprovalTab() {
       .finally(() => setLoading(false));
   }, [page]);
 
-  const refresh = () =>
-    fetchData(page).catch((err) => console.error(err));
-
   const handleApprove = async (id: string) => {
-    const { error } = await supabase.from('profiles').update({ status: 'approved' }).eq('id', id);
-    if (error) { alert(`승인 실패: ${error.message}`); return; }
-    await createNotification(supabase, id, 'kol_approved', '註冊已通過審核', '現在您可以申請任務了。');
-    await refresh();
+    if (processingId) return;
+    setProcessingId(id);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'approved' })
+        .eq('id', id)
+        .select('id')
+        .single();
+      
+      if (error) {
+        alert(`승인 실패: ${error.message}`);
+        return;
+      }
+      
+      setProfiles(prev => prev.filter(p => p.id !== id));
+      setTotalCount(prev => Math.max(0, prev - 1));
+      
+      await createNotification(supabase, id, 'kol_approved', '註冊已通過審核', '現在您可以申請任務了。');
+    } catch (err) {
+      alert(`승인 실패: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   const handleReject = async (id: string) => {
-    const { error } = await supabase.from('profiles').update({ status: 'rejected' }).eq('id', id);
-    if (error) { alert(`거절 실패: ${error.message}`); return; }
-    await createNotification(supabase, id, 'kol_rejected', '註冊審核未通過', '如有疑問，請與我們聯繫。');
-    await refresh();
+    if (processingId) return;
+    setProcessingId(id);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'rejected' })
+        .eq('id', id)
+        .select('id')
+        .single();
+      
+      if (error) {
+        alert(`거절 실패: ${error.message}`);
+        return;
+      }
+      
+      setProfiles(prev => prev.filter(p => p.id !== id));
+      setTotalCount(prev => Math.max(0, prev - 1));
+      
+      await createNotification(supabase, id, 'kol_rejected', '註冊審核未通過', '如有疑問，請與我們聯繫。');
+    } catch (err) {
+      alert(`거절 실패: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   if (loading) return <p className="text-white/60 font-mono">로딩 중...</p>;
@@ -87,11 +127,29 @@ export function KOLApprovalTab() {
               <td className="py-3 px-4 font-mono text-sm text-white/60">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
               <td className="py-3 px-4 text-right">
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => handleApprove(p.id)} className="inline-flex items-center gap-1 rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600">
-                    <Check className="w-4 h-4" /> 승인
+                  <button 
+                    onClick={() => handleApprove(p.id)} 
+                    disabled={processingId !== null}
+                    className="inline-flex items-center gap-1 rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {processingId === p.id ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4" />
+                    )}
+                    {processingId === p.id ? '처리중...' : '승인'}
                   </button>
-                  <button onClick={() => handleReject(p.id)} className="inline-flex items-center gap-1 rounded bg-[#FF0000]/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-[#FF0000]">
-                    <X className="w-4 h-4" /> 거절
+                  <button 
+                    onClick={() => handleReject(p.id)} 
+                    disabled={processingId !== null}
+                    className="inline-flex items-center gap-1 rounded bg-[#FF0000]/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-[#FF0000] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {processingId === p.id ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    {processingId === p.id ? '처리중...' : '거절'}
                   </button>
                 </div>
               </td>
