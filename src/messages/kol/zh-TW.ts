@@ -39,11 +39,12 @@ export const zhTW = {
   goToLoginPage: '前往登入',
 
   // 대기/거절
-  waitingTitle: '存取審核中',
+  waitingTitle: '審核中',
   waitingDesc: '首爾總部正在驗證您的存取代碼。',
   waitingNote: '審核完成後將以郵件通知，請稍候。',
-  rejectedDesc: '您的存取申請已遭拒絕。',
-  rejectedNote: '若有疑問，請聯繫總部。',
+  rejectedTitle: '申請已拒絕',
+  rejectedDesc: '很抱歉，您的存取申請未通過審核。',
+  rejectedNote: '若有疑問，請聯繫客服。',
 
   // 대시보드 (신규 미션)
   dashboardTitle: '新任務',
