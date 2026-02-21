@@ -37,12 +37,10 @@ export function LoginForm() {
         .single();
       
       const status = profile?.status;
-      if (status === 'pending') {
-        window.location.href = '/waiting';
-      } else if (status === 'rejected') {
-        window.location.href = '/rejected';
-      } else {
+      if (status === 'approved') {
         window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/waiting';
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : zhTW.loginFailed);

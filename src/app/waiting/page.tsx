@@ -18,14 +18,8 @@ export default async function WaitingPage() {
     .eq('id', user.id)
     .single();
   
-  const status = profile?.status;
-  
-  if (status === 'approved') {
+  if (profile?.status === 'approved') {
     redirect('/dashboard');
-  }
-  
-  if (status === 'rejected') {
-    redirect('/rejected');
   }
   
   return <WaitingContent />;

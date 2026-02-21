@@ -71,19 +71,16 @@ export async function updateSession(request: NextRequest) {
     const status = profile?.status;
 
     if (pathname === '/' || pathname.startsWith('/dashboard')) {
-      if (status === 'pending') return redirectTo('/waiting');
-      if (status === 'rejected') return redirectTo('/rejected');
+      if (status !== 'approved') return redirectTo('/waiting');
       if (status === 'approved' && pathname === '/') return redirectTo('/dashboard');
     }
 
-    if (pathname === '/waiting') {
-      if (status === 'approved') return redirectTo('/dashboard');
-      if (status === 'rejected') return redirectTo('/rejected');
+    if (pathname === '/waiting' && status === 'approved') {
+      return redirectTo('/dashboard');
     }
-    
+
     if (pathname === '/rejected') {
-      if (status === 'approved') return redirectTo('/dashboard');
-      if (status === 'pending') return redirectTo('/waiting');
+      return redirectTo('/waiting');
     }
   }
 
