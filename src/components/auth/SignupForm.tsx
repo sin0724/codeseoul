@@ -40,18 +40,92 @@ export function SignupForm() {
   if (success) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="w-full max-w-md text-center space-y-4"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md text-center"
       >
-        <p className="text-white/90 font-mono">{zhTW.signupSuccess}</p>
-        <p className="text-sm text-white/60 font-mono">{zhTW.signupSuccessDesc}</p>
-        <Link
-          href="/login"
-          className="inline-block mt-4 text-[#FF0000] hover:underline font-mono"
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          className="mx-auto mb-6 w-20 h-20 rounded-full bg-gradient-to-br from-[#FF0000]/20 to-[#FF0000]/5 border border-[#FF0000]/30 flex items-center justify-center"
         >
-          {zhTW.goToLoginPage}
-        </Link>
+          <svg
+            className="w-10 h-10 text-[#FF0000]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <motion.path
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-xl font-bold text-white mb-3 font-mono tracking-wide"
+        >
+          {zhTW.signupSuccess}
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="text-white/70 font-mono text-sm leading-relaxed mb-6"
+        >
+          {zhTW.signupSuccessDesc}
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white/5 border border-white/10 rounded-lg p-4 mb-6"
+        >
+          <div className="flex items-center justify-center gap-3 text-white/60 text-xs font-mono">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#FF0000]"></span>
+              註冊完成
+            </span>
+            <span className="text-white/30">→</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-white/30 animate-pulse"></span>
+              審核中
+            </span>
+            <span className="text-white/30">→</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-white/20"></span>
+              開始任務
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded bg-[#FF0000] text-white font-mono font-bold transition-all hover:bg-[#cc0000] hover:scale-105"
+          >
+            {zhTW.goToLoginPage}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </motion.div>
       </motion.div>
     );
   }
