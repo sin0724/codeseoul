@@ -111,6 +111,13 @@ export function MissionDetailClient({
         </div>
       )}
 
+      {campaign.guide_content && (
+        <div className="rounded border border-white/10 bg-white/5 p-4 font-mono text-sm">
+          <p className="text-[#FF0000] font-medium mb-2">任務說明</p>
+          <p className="text-white/90 whitespace-pre-wrap">{campaign.guide_content}</p>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-4">
         {!alreadyApplied && (
           <button
