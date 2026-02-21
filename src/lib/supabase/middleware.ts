@@ -15,21 +15,38 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
-            supabaseResponse.cookies.set(name, value, options);
+            supabaseResponse = NextResponse.next({ request });
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true,
+              path: '/',
+            });
           });
         },
       },
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError) {
+    console.error('Auth error:', userError.message);
+  }
+
   const pathname = request.nextUrl.pathname;
   const adminEmail = process.env.CODESEUL_ADMIN_EMAIL || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
 
   const redirectTo = (path: string) => {
     const redirectResp = NextResponse.redirect(new URL(path, request.url));
     supabaseResponse.cookies.getAll().forEach((c) =>
-      redirectResp.cookies.set(c.name, c.value, { path: '/' })
+      redirectResp.cookies.set(c.name, c.value, {
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+      })
     );
     return redirectResp;
   };

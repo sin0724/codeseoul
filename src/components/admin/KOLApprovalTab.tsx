@@ -21,13 +21,23 @@ export function KOLApprovalTab() {
   const fetchData = async (p: number) => {
     const from = (p - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    console.log('Current admin user:', user?.email);
+    
     const { data, count, error } = await supabase
       .from('profiles')
       .select('*', { count: 'exact' })
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .range(from, to);
-    if (error) throw error;
+    
+    console.log('Profiles fetch result:', { data, count, error });
+    
+    if (error) {
+      console.error('Profiles fetch error:', error);
+      throw new Error(`${error.message} (code: ${error.code})`);
+    }
     setProfiles(data ?? []);
     setTotalCount(count ?? 0);
   };
