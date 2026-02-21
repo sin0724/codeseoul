@@ -20,12 +20,13 @@ export function CodeseoulLayout({ children, showNav = true }: CodeseoulLayoutPro
 
   useEffect(() => {
     const check = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       const adminEmail = process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
       setIsAdmin(!!user && !!adminEmail && user.email === adminEmail);
     };
     check();
-  }, []);
+  }, [supabase]);
 
 
   return (
