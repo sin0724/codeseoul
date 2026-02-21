@@ -50,9 +50,7 @@ export function KOLApprovalTab() {
       const { error } = await supabase
         .from('profiles')
         .update({ status: 'approved' })
-        .eq('id', id)
-        .select('id')
-        .single();
+        .eq('id', id);
       
       if (error) {
         alert(`승인 실패: ${error.message}`);
@@ -78,9 +76,7 @@ export function KOLApprovalTab() {
       const { error } = await supabase
         .from('profiles')
         .update({ status: 'rejected' })
-        .eq('id', id)
-        .select('id')
-        .single();
+        .eq('id', id);
       
       if (error) {
         alert(`거절 실패: ${error.message}`);
