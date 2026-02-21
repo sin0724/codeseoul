@@ -31,19 +31,18 @@ export function PayoutStatsTab() {
 
         if (error) throw error;
 
-        const items = (paid ?? []).map((a) => {
-        const c = Array.isArray((a as { campaign?: unknown }).campaign)
-          ? (a as { campaign: { brand_name: string; payout_amount: number }[] }).campaign[0]
-          : (a as { campaign: { brand_name: string; payout_amount: number } | null }).campaign;
-        const amt = c?.payout_amount ?? 0;
-        const d = new Date((a as { applied_at: string }).applied_at);
-        return {
-          brand_name: c?.brand_name ?? '-',
-          year: d.getFullYear(),
-          month: d.getMonth() + 1,
-          amount: amt,
-        };
-      });
+        type ItemType = { brand_name: string; year: number; month: number; amount: number };
+        const items: ItemType[] = (paid ?? []).map((a: { applied_at: string; campaign?: { brand_name: string; payout_amount: number } | { brand_name: string; payout_amount: number }[] | null }) => {
+          const c = Array.isArray(a.campaign) ? a.campaign[0] : a.campaign;
+          const amt = c?.payout_amount ?? 0;
+          const d = new Date(a.applied_at);
+          return {
+            brand_name: c?.brand_name ?? '-',
+            year: d.getFullYear(),
+            month: d.getMonth() + 1,
+            amount: amt,
+          };
+        });
 
       if (mode === 'monthly') {
         const filtered = items.filter((i) => i.year === year);

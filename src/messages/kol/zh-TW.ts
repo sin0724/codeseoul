@@ -178,7 +178,7 @@ export function formatFollowerTiersZh(tiers: string[] | null | undefined): strin
 }
 
 export function t(key: keyof typeof zhTW, params?: Record<string, string | number>): string {
-  let s = zhTW[key];
+  let s: string = zhTW[key];
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
