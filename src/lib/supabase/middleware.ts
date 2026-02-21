@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname === '/';
 
-  const adminEmail = process.env.CODESEUL_ADMIN_EMAIL;
+  const adminEmail = process.env.CODESEUL_ADMIN_EMAIL || process.env.NEXT_PUBLIC_CODESEUL_ADMIN_EMAIL;
 
   if (isProtectedRoute && !user) {
     return redirectTo(new URL('/login', request.url));
