@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { Check, ExternalLink } from 'lucide-react';
+import { Check, X, ExternalLink } from 'lucide-react';
 import { createNotification } from '@/lib/codeseoul/notifications';
 import { Pagination } from '@/components/ui/Pagination';
 
@@ -97,6 +97,24 @@ export function ApplicationReviewTab() {
     await refresh();
   };
 
+  const handleReject = async (id: string, kolId: string, campaignTitle?: string) => {
+    if (!confirm('정말로 이 지원을 거절하시겠습니까?')) return;
+    
+    const { error } = await supabase.from('applications').update({ status: 'rejected' }).eq('id', id);
+    if (error) {
+      alert(`거절 실패: ${error.message}\n\nadmin_emails 테이블에 관리자 이메일이 등록되어 있는지 확인하세요.`);
+      return;
+    }
+    await createNotification(
+      supabase,
+      kolId,
+      'mission_rejected',
+      '任務申請未通過',
+      campaignTitle ? `很抱歉，您申請的「${campaignTitle}」任務未通過審核。` : undefined
+    );
+    await refresh();
+  };
+
   if (loading) return <p className="text-white/60 font-mono">로딩 중...</p>;
 
   if (applications.length === 0) {
@@ -110,7 +128,7 @@ export function ApplicationReviewTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-white/60 font-mono mb-4">
-        지원을 검토한 후 선정 시 [선정] 버튼을 클릭하세요. 선정된 KOL만 캠페인을 진행할 수 있습니다.
+        지원을 검토한 후 [선정] 또는 [거절] 버튼을 클릭하세요. 선정된 KOL만 캠페인을 진행할 수 있습니다.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
@@ -178,13 +196,22 @@ export function ApplicationReviewTab() {
                     {new Date(app.applied_at).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={() => handleSelect(app.id, app.kol_id, c?.title)}
-                      className="inline-flex items-center gap-1 rounded bg-[#FF0000] px-3 py-1.5 text-sm font-mono text-white hover:bg-[#cc0000]"
-                    >
-                      <Check className="w-4 h-4" />
-                      선정
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleSelect(app.id, app.kol_id, c?.title)}
+                        className="inline-flex items-center gap-1 rounded bg-[#FF0000] px-3 py-1.5 text-sm font-mono text-white hover:bg-[#cc0000]"
+                      >
+                        <Check className="w-4 h-4" />
+                        선정
+                      </button>
+                      <button
+                        onClick={() => handleReject(app.id, app.kol_id, c?.title)}
+                        className="inline-flex items-center gap-1 rounded bg-white/10 px-3 py-1.5 text-sm font-mono text-white/80 hover:bg-white/20 border border-white/20"
+                      >
+                        <X className="w-4 h-4" />
+                        거절
+                      </button>
+                    </div>
                   </td>
                 </motion.tr>
               );
