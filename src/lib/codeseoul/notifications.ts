@@ -4,6 +4,7 @@ export type NotificationType =
   | 'kol_approved'
   | 'kol_rejected'
   | 'mission_selected'
+  | 'mission_rejected'
   | 'payout_completed'
   | 'tier_approved';
 
