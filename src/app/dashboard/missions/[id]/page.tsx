@@ -61,7 +61,7 @@ export default function MissionDetailPage() {
         .from('applications')
         .select('status')
         .eq('campaign_id', id);
-      setApplicantsCount(apps?.length ?? 0);
+      setApplicantsCount(apps?.filter((a) => a.status !== 'rejected').length ?? 0);
       setSelectedCount(apps?.filter((a) => ['selected', 'completed', 'paid'].includes(a.status)).length ?? 0);
 
       setLoading(false);

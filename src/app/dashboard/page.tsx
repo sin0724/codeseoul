@@ -66,7 +66,9 @@ export default function DashboardPage() {
             if (!acc[app.campaign_id]) {
               acc[app.campaign_id] = { applicants: 0, selected: 0 };
             }
-            acc[app.campaign_id].applicants += 1;
+            if (app.status !== 'rejected') {
+              acc[app.campaign_id].applicants += 1;
+            }
             if (app.status === 'selected' || app.status === 'completed' || app.status === 'paid') {
               acc[app.campaign_id].selected += 1;
             }
