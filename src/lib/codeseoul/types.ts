@@ -39,10 +39,13 @@ export interface Profile {
 
 export type FollowerTier = 'under_10k' | '10k_30k' | '30k_50k' | '50k_70k' | '100k_plus';
 
+export type CampaignPlatform = 'instagram' | 'youtube';
+
 export interface Campaign {
   id: string;
   title: string;
   brand_name: string;
+  platform?: CampaignPlatform | null;
   guide_content: string | null;
   guide_url: string | null;
   contact_line?: string | null;

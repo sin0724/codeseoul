@@ -2,9 +2,26 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Instagram, Youtube } from 'lucide-react';
 import type { Campaign } from '@/lib/codeseoul/types';
 import { zhTW, formatFollowerTiersZh, t } from '@/messages/kol/zh-TW';
+
+function PlatformBadge({ platform }: { platform?: string | null }) {
+  if (platform === 'youtube') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-600/20 text-red-500 text-xs font-mono">
+        <Youtube className="w-3 h-3" />
+        YT
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-pink-500/20 text-pink-400 text-xs font-mono">
+      <Instagram className="w-3 h-3" />
+      IG
+    </span>
+  );
+}
 
 interface MissionCardProps {
   campaign: Campaign;
@@ -42,9 +59,12 @@ export function MissionCard({
               />
             )}
             <div className="min-w-0 flex-1 flex flex-col gap-2">
-              <p className="text-xs text-[#FF0000] font-mono shrink-0">
-                {campaign.brand_name}
-              </p>
+              <div className="flex items-center gap-2 shrink-0">
+                <p className="text-xs text-[#FF0000] font-mono">
+                  {campaign.brand_name}
+                </p>
+                <PlatformBadge platform={campaign.platform} />
+              </div>
               <h2 className="font-bold text-white font-mono line-clamp-2 min-h-[2.75rem] shrink-0">
                 {campaign.title}
               </h2>

@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import { Calendar, Plus, List, Trash2, Search, CalendarPlus } from 'lucide-react';
-import type { Campaign, FollowerTier } from '@/lib/codeseoul/types';
+import type { Campaign, FollowerTier, CampaignPlatform } from '@/lib/codeseoul/types';
 import { FOLLOWER_TIERS } from '@/lib/codeseoul/follower-utils';
 import { Pagination } from '@/components/ui/Pagination';
 
 const defaultCampaign: {
   title: string;
   brand_name: string;
+  platform: CampaignPlatform;
   guide_content: string;
   guide_url: string;
   contact_line: string;
@@ -24,6 +25,7 @@ const defaultCampaign: {
 } = {
   title: '',
   brand_name: '',
+  platform: 'instagram',
   guide_content: '',
   guide_url: '',
   contact_line: '',
@@ -117,6 +119,7 @@ export function MissionManagerTab() {
     const { brand_image_url: _, ...rest } = form;
     const payload = {
       ...rest,
+      platform: form.platform,
       payout_amount: Number(form.payout_amount) || 0,
       recruitment_quota: Number(form.recruitment_quota) || null,
       deadline: form.deadline || null,
@@ -150,12 +153,13 @@ export function MissionManagerTab() {
   };
 
   const handleEdit = (c: Campaign) => {
-    const cExt = c as { brand_image_url?: string; recruitment_quota?: number; contact_line?: string; contact_kakao?: string; follower_tiers?: FollowerTier[] };
+    const cExt = c as { brand_image_url?: string; recruitment_quota?: number; contact_line?: string; contact_kakao?: string; follower_tiers?: FollowerTier[]; platform?: CampaignPlatform };
     setEditingId(c.id);
     setForm({
       ...defaultCampaign,
       title: c.title,
       brand_name: c.brand_name,
+      platform: cExt.platform ?? 'instagram',
       guide_content: c.guide_content ?? '',
       guide_url: c.guide_url ?? '',
       contact_line: cExt.contact_line ?? '',
@@ -276,7 +280,7 @@ export function MissionManagerTab() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="block text-sm text-white/80 mb-1 font-mono">제목</label>
               <input
@@ -294,6 +298,22 @@ export function MissionManagerTab() {
                 required
                 className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
               />
+            </div>
+            <div>
+              <label className="block text-sm text-white/80 mb-1 font-mono">플랫폼</label>
+              <select
+                value={form.platform}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    platform: e.target.value as CampaignPlatform,
+                  }))
+                }
+                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+              >
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+              </select>
             </div>
           </div>
           <div>
@@ -473,7 +493,7 @@ export function MissionManagerTab() {
                     <div>
                       <p className="font-mono font-bold">{c.title}</p>
                       <p className="text-sm text-white/60 font-mono">
-                        {c.brand_name} · {c.payout_amount.toLocaleString()} TWD ·{' '}
+                        {c.brand_name} · {(c as { platform?: string }).platform === 'youtube' ? 'YT' : 'IG'} · {c.payout_amount.toLocaleString()} TWD ·{' '}
                         <span
                           className={
                             c.status === 'active' ? 'text-green-500' : 'text-white/50'
