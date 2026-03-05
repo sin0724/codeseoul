@@ -9,7 +9,9 @@ import { PayoutQueueTab } from '@/components/admin/PayoutQueueTab';
 import { CompletedReviewTab } from '@/components/admin/CompletedReviewTab';
 import { TierUpgradeTab } from '@/components/admin/TierUpgradeTab';
 import { PayoutStatsTab } from '@/components/admin/PayoutStatsTab';
-import { Users, Target, Banknote, UserCheck, FileCheck, Award, BarChart3 } from 'lucide-react';
+import { AgentManagementTab } from '@/components/admin/AgentManagementTab';
+import { AgentPerformanceTab } from '@/components/admin/AgentPerformanceTab';
+import { Users, Target, Banknote, UserCheck, FileCheck, Award, BarChart3, UserPlus, TrendingUp } from 'lucide-react';
 
 const tabs = [
   { id: 'kol', label: 'KOL 승인 관리', icon: Users },
@@ -19,6 +21,8 @@ const tabs = [
   { id: 'payout', label: '정산 큐', icon: Banknote },
   { id: 'payout-stats', label: '정산 통계', icon: BarChart3 },
   { id: 'tier', label: '티어 승급 검수', icon: Award },
+  { id: 'agents', label: '에이전트 관리', icon: UserPlus },
+  { id: 'agent-stats', label: '에이전트 실적', icon: TrendingUp },
 ];
 
 export default function AdminCodeseoulPage() {
@@ -59,6 +63,8 @@ export default function AdminCodeseoulPage() {
       {activeTab === 'payout' && <PayoutQueueTab />}
       {activeTab === 'payout-stats' && <PayoutStatsTab />}
       {activeTab === 'tier' && <TierUpgradeTab />}
+      {activeTab === 'agents' && <AgentManagementTab />}
+      {activeTab === 'agent-stats' && <AgentPerformanceTab />}
     </AdminLayout>
   );
 }

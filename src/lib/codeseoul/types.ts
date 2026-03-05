@@ -1,6 +1,17 @@
 export type ProfileStatus = 'pending' | 'approved' | 'rejected';
 export type CampaignStatus = 'active' | 'closed';
 export type ApplicationStatus = 'applied' | 'selected' | 'completed' | 'confirmed' | 'paid';
+export type AgentStatus = 'active' | 'inactive';
+
+export interface Agent {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  agent_code: string;
+  status: AgentStatus;
+  created_at: string;
+}
 
 export interface BankInfo {
   beneficiary_name: string;      // 수취인 영문이름
@@ -34,6 +45,9 @@ export interface Profile {
   kakao_id?: string | null;
   bank_info: BankInfo;
   status: ProfileStatus;
+  agent_id?: string | null;
+  agent_code_used?: string | null;
+  referred_at?: string | null;
   created_at: string;
 }
 

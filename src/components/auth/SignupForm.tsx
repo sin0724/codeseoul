@@ -11,21 +11,60 @@ export function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [agentCode, setAgentCode] = useState('');
+  const [agentCodeError, setAgentCodeError] = useState<string | null>(null);
+  const [agentCodeValid, setAgentCodeValid] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
+  const validateAgentCode = async (code: string) => {
+    if (!code.trim()) {
+      setAgentCodeError(null);
+      setAgentCodeValid(null);
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('agents')
+      .select('id, status')
+      .eq('agent_code', code.toUpperCase().trim())
+      .single();
+    
+    if (error || !data) {
+      setAgentCodeError(zhTW.agentCodeInvalid);
+      setAgentCodeValid(false);
+    } else if (data.status !== 'active') {
+      setAgentCodeError(zhTW.agentCodeInactive);
+      setAgentCodeValid(false);
+    } else {
+      setAgentCodeError(null);
+      setAgentCodeValid(true);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    if (agentCode && agentCodeValid === false) {
+      setError(zhTW.agentCodeValidOrEmpty);
+      return;
+    }
+    
     setLoading(true);
     try {
+      const metadata: Record<string, string> = { full_name: fullName };
+      if (agentCode.trim() && agentCodeValid) {
+        metadata.agent_code = agentCode.toUpperCase().trim();
+      }
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: { data: metadata },
       });
       if (error) throw error;
       setSuccess(true);
@@ -178,6 +217,44 @@ export function SignupForm() {
             minLength={6}
             className="w-full rounded border border-white/20 bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
           />
+        </div>
+        <div>
+          <label htmlFor="agentCode" className="block text-sm font-mono text-white/80 mb-2">
+            {zhTW.agentCode} <span className="text-white/40">({zhTW.agentCodeOptional})</span>
+          </label>
+          <div className="relative">
+            <input
+              id="agentCode"
+              type="text"
+              value={agentCode}
+              onChange={(e) => {
+                const val = e.target.value.toUpperCase();
+                setAgentCode(val);
+                if (val.length >= 6) {
+                  validateAgentCode(val);
+                } else {
+                  setAgentCodeError(null);
+                  setAgentCodeValid(null);
+                }
+              }}
+              onBlur={() => validateAgentCode(agentCode)}
+              maxLength={9}
+              className={`w-full rounded border bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:outline-none focus:ring-1 ${
+                agentCodeValid === true
+                  ? 'border-green-500 focus:border-green-500 focus:ring-green-500'
+                  : agentCodeValid === false
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                  : 'border-white/20 focus:border-[#FF0000] focus:ring-[#FF0000]'
+              }`}
+              placeholder={zhTW.agentCodePlaceholder}
+            />
+            {agentCodeValid === true && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">✓</span>
+            )}
+          </div>
+          {agentCodeError && (
+            <p className="text-sm text-red-500 font-mono mt-1">{agentCodeError}</p>
+          )}
         </div>
         {error && (
           <p className="text-sm text-[#FF0000] font-mono">{error}</p>

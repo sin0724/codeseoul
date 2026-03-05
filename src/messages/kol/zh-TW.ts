@@ -37,6 +37,14 @@ export const zhTW = {
   signupSuccess: '註冊已完成，等待審核中。',
   signupSuccessDesc: '首爾總部驗證您的存取代碼後，將以郵件通知您。',
   goToLoginPage: '前往登入',
+  
+  // 에이전트 추천 코드
+  agentCode: '推薦碼',
+  agentCodeOptional: '選填',
+  agentCodePlaceholder: 'AGTXXXXXX',
+  agentCodeInvalid: '無效的推薦碼',
+  agentCodeInactive: '此推薦碼已停用',
+  agentCodeValidOrEmpty: '請輸入有效的推薦碼或留空',
 
   // 대기/거절
   waitingTitle: '審核中',
