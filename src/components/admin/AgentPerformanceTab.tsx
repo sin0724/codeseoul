@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, Users, UserCheck, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users, UserCheck, CheckCircle, ArrowRightLeft, Trash2, X } from 'lucide-react';
 import type { Agent, Profile, Application, Campaign } from '@/lib/codeseoul/types';
 import { Pagination } from '@/components/ui/Pagination';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -23,6 +23,7 @@ interface KolWithApplications extends Profile {
 
 export function AgentPerformanceTab() {
   const [stats, setStats] = useState<AgentStats[]>([]);
+  const [allAgents, setAllAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -31,7 +32,20 @@ export function AgentPerformanceTab() {
   const [kolsLoading, setKolsLoading] = useState(false);
   const [expandedKolId, setExpandedKolId] = useState<string | null>(null);
   
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [selectedKol, setSelectedKol] = useState<KolWithApplications | null>(null);
+  const [targetAgentId, setTargetAgentId] = useState<string>('');
+  const [actionLoading, setActionLoading] = useState(false);
+  
   const supabase = createClient();
+
+  const fetchAllAgents = async () => {
+    const { data } = await supabase
+      .from('agents')
+      .select('*')
+      .order('name', { ascending: true });
+    setAllAgents(data ?? []);
+  };
 
   const fetchData = async (p: number) => {
     const from = (p - 1) * PAGE_SIZE;
@@ -89,10 +103,75 @@ export function AgentPerformanceTab() {
 
   useEffect(() => {
     setLoading(true);
-    fetchData(page)
+    Promise.all([fetchData(page), fetchAllAgents()])
       .catch((err) => alert(`데이터 로드 실패: ${err.message}`))
       .finally(() => setLoading(false));
   }, [page]);
+
+  const openMoveModal = (kol: KolWithApplications) => {
+    setSelectedKol(kol);
+    setTargetAgentId('');
+    setShowMoveModal(true);
+  };
+
+  const closeMoveModal = () => {
+    setShowMoveModal(false);
+    setSelectedKol(null);
+    setTargetAgentId('');
+  };
+
+  const handleMoveKol = async () => {
+    if (!selectedKol || !targetAgentId) return;
+    
+    setActionLoading(true);
+    try {
+      const targetAgent = allAgents.find(a => a.id === targetAgentId);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          agent_id: targetAgentId,
+          agent_code_used: targetAgent?.agent_code ?? null,
+        })
+        .eq('id', selectedKol.id);
+      
+      if (error) throw error;
+      
+      setExpandedKols(prev => prev.filter(k => k.id !== selectedKol.id));
+      closeMoveModal();
+      await fetchData(page);
+    } catch (err) {
+      alert(`이동 실패: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRemoveAgent = async (kol: KolWithApplications) => {
+    if (!confirm(`${kol.full_name ?? kol.email}의 에이전트 연결을 해제하시겠습니까?`)) {
+      return;
+    }
+    
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          agent_id: null,
+          agent_code_used: null,
+        })
+        .eq('id', kol.id);
+      
+      if (error) throw error;
+      
+      setExpandedKols(prev => prev.filter(k => k.id !== kol.id));
+      await fetchData(page);
+    } catch (err) {
+      alert(`해제 실패: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const toggleExpand = async (agentId: string) => {
     if (expandedAgentId === agentId) {
@@ -285,10 +364,34 @@ export function AgentPerformanceTab() {
                                             {kol.status === 'approved' ? '승인' : kol.status === 'rejected' ? '거절' : '대기'}
                                           </span>
                                         </div>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-3">
                                           <span className="font-mono text-xs text-white/40">
                                             완료 미션: <span className="text-[#FF0000]">{kol.applications?.length ?? 0}</span>
                                           </span>
+                                          <div className="flex items-center gap-1">
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                openMoveModal(kol);
+                                              }}
+                                              disabled={actionLoading}
+                                              className="p-1.5 rounded border border-white/10 hover:border-blue-500/50 text-white/50 hover:text-blue-400 transition-colors disabled:opacity-50"
+                                              title="다른 에이전트로 이동"
+                                            >
+                                              <ArrowRightLeft className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRemoveAgent(kol);
+                                              }}
+                                              disabled={actionLoading}
+                                              className="p-1.5 rounded border border-white/10 hover:border-red-500/50 text-white/50 hover:text-red-400 transition-colors disabled:opacity-50"
+                                              title="에이전트 연결 해제"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
                                           {(kol.applications?.length ?? 0) > 0 && (
                                             expandedKolId === kol.id ? (
                                               <ChevronUp className="w-4 h-4 text-white/40" />
@@ -361,6 +464,73 @@ export function AgentPerformanceTab() {
             pageSize={PAGE_SIZE}
           />
         </>
+      )}
+
+      {showMoveModal && selectedKol && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#1a1a1a] border border-white/10 rounded-lg p-6 w-full max-w-md"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-mono font-bold">KOL 에이전트 이동</h3>
+              <button onClick={closeMoveModal} className="text-white/60 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-white/5 border border-white/10 rounded p-3">
+                <p className="text-white/60 text-xs font-mono mb-1">이동할 KOL</p>
+                <p className="font-mono text-sm">{selectedKol.full_name ?? selectedKol.email}</p>
+                <p className="text-white/40 text-xs font-mono">{selectedKol.email}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-mono text-white/80 mb-2">
+                  이동할 에이전트 선택
+                </label>
+                <select
+                  value={targetAgentId}
+                  onChange={(e) => setTargetAgentId(e.target.value)}
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#FF0000] focus:outline-none"
+                >
+                  <option value="">에이전트를 선택하세요</option>
+                  {allAgents
+                    .filter(a => a.id !== expandedAgentId && a.status === 'active')
+                    .map(agent => (
+                      <option key={agent.id} value={agent.id}>
+                        {agent.name} ({agent.agent_code})
+                      </option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  onClick={closeMoveModal}
+                  className="px-4 py-2 rounded border border-white/20 text-white/70 hover:text-white font-mono text-sm transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleMoveKol}
+                  disabled={actionLoading || !targetAgentId}
+                  className="flex items-center gap-2 px-4 py-2 rounded bg-blue-600 text-white font-mono text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {actionLoading ? (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <ArrowRightLeft className="w-4 h-4" />
+                  )}
+                  {actionLoading ? '이동 중...' : '이동'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
