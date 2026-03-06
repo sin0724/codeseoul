@@ -48,6 +48,10 @@ export interface Profile {
   agent_id?: string | null;
   agent_code_used?: string | null;
   referred_at?: string | null;
+  onboarding_completed?: boolean;
+  onboarding_completed_at?: string | null;
+  onboarding_step?: number;
+  first_login_at?: string | null;
   created_at: string;
 }
 

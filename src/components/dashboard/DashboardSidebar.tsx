@@ -5,12 +5,21 @@ import Link from 'next/link';
 import { Target, ListTodo, User, Shield, BookOpen, Banknote, ClipboardList } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { TierBadge } from '@/components/dashboard/TierBadge';
+import { ProfileCompletionBar } from '@/components/onboarding/ProfileCompletionBar';
+import { useOnboardingContext } from '@/components/onboarding/OnboardingProvider';
 import { zhTW } from '@/messages/kol/zh-TW';
 import type { ProgramTier } from '@/lib/codeseoul/types';
 
 export function DashboardSidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [tier, setTier] = useState<ProgramTier | null>(null);
+  
+  let onboardingContext: ReturnType<typeof useOnboardingContext> | null = null;
+  try {
+    onboardingContext = useOnboardingContext();
+  } catch {
+    // Context not available (admin user)
+  }
 
   useEffect(() => {
     const check = async () => {
@@ -47,6 +56,14 @@ export function DashboardSidebar() {
       {tier && (
         <div className="mb-4">
           <TierBadge tier={tier} size="sm" />
+        </div>
+      )}
+      {onboardingContext && onboardingContext.completion.percentage < 100 && (
+        <div className="mb-4">
+          <ProfileCompletionBar
+            completion={onboardingContext.completion}
+            onComplete={onboardingContext.reopenOnboarding}
+          />
         </div>
       )}
       <nav className="space-y-1">
