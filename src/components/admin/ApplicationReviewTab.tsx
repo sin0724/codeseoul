@@ -38,6 +38,15 @@ interface AppWithProfile {
 
 const PAGE_SIZE = 10;
 
+function normalizeUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
 export function ApplicationReviewTab() {
   const [applications, setApplications] = useState<AppWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -179,7 +188,7 @@ export function ApplicationReviewTab() {
                           {list.filter((l) => l.url?.trim()).map((l, i) => (
                             <a
                               key={i}
-                              href={l.url}
+                              href={normalizeUrl(l.url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-[#FF0000] hover:underline"
