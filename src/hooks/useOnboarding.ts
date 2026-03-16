@@ -115,52 +115,70 @@ export function useOnboarding() {
 
   const saveProgress = useCallback(async (step: number, data?: Partial<OnboardingProfile>) => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return;
+      }
+
+      const updateData: Record<string, unknown> = {
+        onboarding_step: step,
+        ...data,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Failed to save onboarding progress:', error);
+        return;
+      }
+
+      setCurrentStep(step);
+      if (data) {
+        setProfile(prev => prev ? { ...prev, ...data, onboarding_step: step } : null);
+      }
+    } catch (err) {
+      console.error('Error saving onboarding progress:', err);
+    } finally {
       setSaving(false);
-      return;
     }
-
-    const updateData: Record<string, unknown> = {
-      onboarding_step: step,
-      ...data,
-    };
-
-    await supabase
-      .from('profiles')
-      .update(updateData)
-      .eq('id', user.id);
-
-    setCurrentStep(step);
-    if (data) {
-      setProfile(prev => prev ? { ...prev, ...data, onboarding_step: step } : null);
-    }
-    setSaving(false);
   }, [supabase]);
 
   const completeOnboarding = useCallback(async () => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setSaving(false);
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return;
+      }
 
-    await supabase
-      .from('profiles')
-      .update({
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          onboarding_completed: true,
+          onboarding_completed_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Failed to complete onboarding:', error);
+        return;
+      }
+
+      setProfile(prev => prev ? {
+        ...prev,
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
-
-    setProfile(prev => prev ? {
-      ...prev,
-      onboarding_completed: true,
-      onboarding_completed_at: new Date().toISOString(),
-    } : null);
-    setShowOnboarding(false);
-    setSaving(false);
+      } : null);
+      setShowOnboarding(false);
+    } catch (err) {
+      console.error('Error completing onboarding:', err);
+    } finally {
+      setSaving(false);
+    }
   }, [supabase]);
 
   const skipOnboarding = useCallback(async () => {

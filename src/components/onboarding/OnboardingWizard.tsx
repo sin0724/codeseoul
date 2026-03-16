@@ -124,10 +124,14 @@ export function OnboardingWizard({
   };
 
   const handleNext = async () => {
-    await saveCurrentStepData();
-    if (step < TOTAL_STEPS - 1) {
-      setStep(step + 1);
-      await onSaveProgress(step + 1);
+    try {
+      await saveCurrentStepData();
+      if (step < TOTAL_STEPS - 1) {
+        setStep(step + 1);
+        await onSaveProgress(step + 1);
+      }
+    } catch (err) {
+      console.error('Error in handleNext:', err);
     }
   };
 
@@ -138,14 +142,22 @@ export function OnboardingWizard({
   };
 
   const handleFinish = async () => {
-    await saveCurrentStepData();
-    await onComplete();
+    try {
+      await saveCurrentStepData();
+      await onComplete();
+    } catch (err) {
+      console.error('Error in handleFinish:', err);
+    }
   };
 
   const handleSkipStep = async () => {
-    if (step < TOTAL_STEPS - 1) {
-      setStep(step + 1);
-      await onSaveProgress(step + 1);
+    try {
+      if (step < TOTAL_STEPS - 1) {
+        setStep(step + 1);
+        await onSaveProgress(step + 1);
+      }
+    } catch (err) {
+      console.error('Error in handleSkipStep:', err);
     }
   };
 
