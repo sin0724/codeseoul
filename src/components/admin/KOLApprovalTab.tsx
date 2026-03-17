@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { Check, X, ExternalLink } from 'lucide-react';
-import type { Profile } from '@/lib/codeseoul/types';
+import { Check, X, ExternalLink, Pencil } from 'lucide-react';
+import type { Profile, ProgramTier } from '@/lib/codeseoul/types';
 import { createNotification } from '@/lib/codeseoul/notifications';
 import { Pagination } from '@/components/ui/Pagination';
+import { PROGRAM_TIERS } from '@/lib/codeseoul/tier-program';
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +29,14 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: '전체' },
 ];
 
+interface EditFormData {
+  full_name: string;
+  follower_count: string;
+  tier: ProgramTier | '';
+  line_id: string;
+  kakao_id: string;
+}
+
 export function KOLApprovalTab() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +44,9 @@ export function KOLApprovalTab() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [editForm, setEditForm] = useState<EditFormData>({ full_name: '', follower_count: '', tier: '', line_id: '', kakao_id: '' });
+  const [editSaving, setEditSaving] = useState(false);
   const supabase = createClient();
 
   const fetchData = async (p: number, filter: StatusFilter) => {
@@ -79,6 +91,56 @@ export function KOLApprovalTab() {
   const handleFilterChange = (filter: StatusFilter) => {
     setStatusFilter(filter);
     setPage(1);
+  };
+
+  const openEditModal = (profile: Profile) => {
+    setEditingProfile(profile);
+    setEditForm({
+      full_name: profile.full_name ?? '',
+      follower_count: (profile as { follower_count?: number }).follower_count?.toString() ?? '',
+      tier: ((profile as { tier?: ProgramTier }).tier as ProgramTier) ?? '',
+      line_id: (profile as { line_id?: string }).line_id ?? '',
+      kakao_id: (profile as { kakao_id?: string }).kakao_id ?? '',
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editingProfile) return;
+    setEditSaving(true);
+
+    try {
+      const followerNum = editForm.follower_count.trim() ? parseInt(editForm.follower_count.replace(/[^0-9]/g, ''), 10) : null;
+      const updateData: Record<string, unknown> = {
+        full_name: editForm.full_name.trim() || null,
+        follower_count: isNaN(followerNum as number) ? null : followerNum,
+        tier: editForm.tier || null,
+        line_id: editForm.line_id.trim() || null,
+        kakao_id: editForm.kakao_id.trim() || null,
+      };
+
+      const { error, data } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', editingProfile.id)
+        .select();
+
+      if (error) {
+        alert(`수정 실패: ${error.message}`);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        alert('수정 실패: 업데이트된 행이 없습니다. RLS 정책을 확인하세요.');
+        return;
+      }
+
+      setProfiles(prev => prev.map(p => p.id === editingProfile.id ? { ...p, ...updateData } as Profile : p));
+      setEditingProfile(null);
+    } catch (err) {
+      alert(`수정 실패: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const handleApprove = async (id: string) => {
@@ -233,9 +295,7 @@ export function KOLApprovalTab() {
                   <th className="text-left py-3 px-4 font-mono text-sm text-white/80">SNS</th>
                   <th className="text-left py-3 px-4 font-mono text-sm text-white/80">상태</th>
                   <th className="text-left py-3 px-4 font-mono text-sm text-white/80">신청일</th>
-                  {statusFilter === 'pending' && (
-                    <th className="text-right py-3 px-4 font-mono text-sm text-white/80">액션</th>
-                  )}
+                  <th className="text-right py-3 px-4 font-mono text-sm text-white/80">액션</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,36 +312,45 @@ export function KOLApprovalTab() {
                     <td className="py-3 px-4 font-mono text-sm">{renderSnsLinks(p)}</td>
                     <td className="py-3 px-4 font-mono text-sm">{getStatusBadge(p.status)}</td>
                     <td className="py-3 px-4 font-mono text-sm text-white/60">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
-                    {statusFilter === 'pending' && (
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button 
-                            onClick={() => handleApprove(p.id)} 
-                            disabled={processingId !== null}
-                            className="inline-flex items-center gap-1 rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {processingId === p.id ? (
-                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                              <Check className="w-4 h-4" />
-                            )}
-                            {processingId === p.id ? '처리중...' : '승인'}
-                          </button>
-                          <button 
-                            onClick={() => handleReject(p.id)} 
-                            disabled={processingId !== null}
-                            className="inline-flex items-center gap-1 rounded bg-[#FF0000]/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-[#FF0000] disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {processingId === p.id ? (
-                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                              <X className="w-4 h-4" />
-                            )}
-                            {processingId === p.id ? '처리중...' : '거절'}
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => openEditModal(p)}
+                          className="inline-flex items-center gap-1 rounded bg-white/10 px-3 py-1.5 text-sm font-mono text-white/80 hover:bg-white/20 border border-white/20"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          수정
+                        </button>
+                        {statusFilter === 'pending' && (
+                          <>
+                            <button 
+                              onClick={() => handleApprove(p.id)} 
+                              disabled={processingId !== null}
+                              className="inline-flex items-center gap-1 rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {processingId === p.id ? (
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              ) : (
+                                <Check className="w-4 h-4" />
+                              )}
+                              {processingId === p.id ? '처리중...' : '승인'}
+                            </button>
+                            <button 
+                              onClick={() => handleReject(p.id)} 
+                              disabled={processingId !== null}
+                              className="inline-flex items-center gap-1 rounded bg-[#FF0000]/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-[#FF0000] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {processingId === p.id ? (
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              ) : (
+                                <X className="w-4 h-4" />
+                              )}
+                              {processingId === p.id ? '처리중...' : '거절'}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </motion.tr>
                 ))}
               </tbody>
@@ -289,6 +358,97 @@ export function KOLApprovalTab() {
           </div>
           <Pagination page={page} totalPages={Math.max(1, Math.ceil(totalCount / PAGE_SIZE))} onPageChange={setPage} totalItems={totalCount} pageSize={PAGE_SIZE} />
         </>
+      )}
+
+      {editingProfile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-lg shadow-2xl">
+            <button
+              onClick={() => setEditingProfile(null)}
+              className="absolute top-4 right-4 text-white/40 hover:text-white/60"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6 space-y-5">
+              <div>
+                <h2 className="text-lg font-bold font-mono text-white">KOL 정보 수정</h2>
+                <p className="text-sm text-white/50 font-mono mt-1">{editingProfile.email}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/80 mb-1 font-mono">이름</label>
+                <input
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/80 mb-1 font-mono">팔로워 수</label>
+                <input
+                  value={editForm.follower_count}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, follower_count: e.target.value }))}
+                  placeholder="예: 10000"
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white placeholder:text-white/40"
+                />
+                <p className="text-xs text-white/40 font-mono mt-1">숫자만 입력 (예: 10000, 50000)</p>
+              </div>
+
+              <div>
+                <label className="block text-sm text-white/80 mb-1 font-mono">티어</label>
+                <select
+                  value={editForm.tier}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, tier: e.target.value as ProgramTier | '' }))}
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                >
+                  <option value="">미지정</option>
+                  {PROGRAM_TIERS.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.id} ({t.min.toLocaleString()} ~ {t.max === Infinity ? '∞' : t.max.toLocaleString()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm text-white/80 mb-1 font-mono">LINE ID</label>
+                  <input
+                    value={editForm.line_id}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, line_id: e.target.value }))}
+                    className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-white/80 mb-1 font-mono">KakaoTalk ID</label>
+                  <input
+                    value={editForm.kakao_id}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, kakao_id: e.target.value }))}
+                    className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setEditingProfile(null)}
+                  className="flex-1 rounded border border-white/20 px-4 py-2 font-mono text-white/60 hover:bg-white/5 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  disabled={editSaving}
+                  className="flex-1 rounded bg-[#FF0000] px-4 py-2 font-mono font-bold text-white hover:bg-[#cc0000] disabled:opacity-50"
+                >
+                  {editSaving ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
