@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { Check, X, ExternalLink, Pencil } from 'lucide-react';
+import { Check, X, ExternalLink, Pencil, Search } from 'lucide-react';
 import type { Profile, ProgramTier } from '@/lib/codeseoul/types';
 import { createNotification } from '@/lib/codeseoul/notifications';
 import { Pagination } from '@/components/ui/Pagination';
@@ -44,17 +44,27 @@ export function KOLApprovalTab() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [tierFilter, setTierFilter] = useState<ProgramTier | ''>('');
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editForm, setEditForm] = useState<EditFormData>({ full_name: '', follower_count: '', tier: '', line_id: '', kakao_id: '' });
   const [editSaving, setEditSaving] = useState(false);
   const supabase = createClient();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchData = async (p: number, filter: StatusFilter) => {
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(value);
+      setPage(1);
+    }, 400);
+  }, []);
+
+  const fetchData = async (p: number, filter: StatusFilter, search: string, tier: ProgramTier | '') => {
     const from = (p - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log('Current admin user:', user?.email);
     
     let query = supabase
       .from('profiles')
@@ -63,12 +73,18 @@ export function KOLApprovalTab() {
     if (filter !== 'all') {
       query = query.eq('status', filter);
     }
+
+    if (search.trim()) {
+      query = query.or(`email.ilike.%${search.trim()}%,full_name.ilike.%${search.trim()}%`);
+    }
+
+    if (tier) {
+      query = query.eq('tier', tier);
+    }
     
     const { data, count, error } = await query
       .order('created_at', { ascending: false })
       .range(from, to);
-    
-    console.log('Profiles fetch result:', { data, count, error });
     
     if (error) {
       console.error('Profiles fetch error:', error);
@@ -80,16 +96,21 @@ export function KOLApprovalTab() {
 
   useEffect(() => {
     setLoading(true);
-    fetchData(page, statusFilter)
+    fetchData(page, statusFilter, debouncedSearch, tierFilter)
       .catch((err) => {
         console.error('KOLApprovalTab fetch error:', err);
         alert(`데이터 로드 실패: ${err instanceof Error ? err.message : String(err)}`);
       })
       .finally(() => setLoading(false));
-  }, [page, statusFilter]);
+  }, [page, statusFilter, debouncedSearch, tierFilter]);
 
   const handleFilterChange = (filter: StatusFilter) => {
     setStatusFilter(filter);
+    setPage(1);
+  };
+
+  const handleTierFilterChange = (tier: ProgramTier | '') => {
+    setTierFilter(tier);
     setPage(1);
   };
 
@@ -257,7 +278,7 @@ export function KOLApprovalTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {STATUS_OPTIONS.map((opt) => (
           <button
             key={opt.value}
@@ -273,13 +294,55 @@ export function KOLApprovalTab() {
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="이메일 또는 이름으로 검색..."
+            className="w-full rounded border border-white/20 bg-black/50 pl-10 pr-4 py-2 font-mono text-sm text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => { setSearchQuery(''); setDebouncedSearch(''); setPage(1); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <select
+          value={tierFilter}
+          onChange={(e) => handleTierFilterChange(e.target.value as ProgramTier | '')}
+          className="rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-sm text-white focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+        >
+          <option value="">전체 티어</option>
+          {PROGRAM_TIERS.map((t) => (
+            <option key={t.id} value={t.id}>{t.id}</option>
+          ))}
+        </select>
+        {(debouncedSearch || tierFilter) && (
+          <span className="text-xs text-white/50 font-mono">
+            검색 결과: {totalCount}건
+          </span>
+        )}
+      </div>
+
       {profiles.length === 0 ? (
         <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
           <p className="text-white/50 font-mono">
-            {statusFilter === 'pending' && '대기 중인 KOL이 없습니다.'}
-            {statusFilter === 'approved' && '승인된 KOL이 없습니다.'}
-            {statusFilter === 'rejected' && '거절된 KOL이 없습니다.'}
-            {statusFilter === 'all' && '등록된 KOL이 없습니다.'}
+            {(debouncedSearch || tierFilter) ? (
+              '검색 결과가 없습니다.'
+            ) : (
+              <>
+                {statusFilter === 'pending' && '대기 중인 KOL이 없습니다.'}
+                {statusFilter === 'approved' && '승인된 KOL이 없습니다.'}
+                {statusFilter === 'rejected' && '거절된 KOL이 없습니다.'}
+                {statusFilter === 'all' && '등록된 KOL이 없습니다.'}
+              </>
+            )}
           </p>
         </div>
       ) : (
