@@ -42,6 +42,7 @@ export function OnboardingWizard({
 }: OnboardingWizardProps) {
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(currentStep);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [followerInput, setFollowerInput] = useState(
@@ -100,7 +101,7 @@ export function OnboardingWizard({
     const parsedFollower = parseFollowerCount(followerInput);
     
     const data: Partial<OnboardingProfile> = {
-      full_name: fullName,
+      full_name: fullName || null,
       follower_count: parsedFollower ?? null,
       sns_links: validLinks.length > 0 ? validLinks : [],
       line_id: lineId.trim() || null,
@@ -109,14 +110,14 @@ export function OnboardingWizard({
 
     if (!skipBankInfo) {
       data.bank_info = {
-        beneficiary_name: beneficiaryName,
-        address_english: addressEnglish,
-        phone_number: phoneNumber,
-        bank_name: bankName,
+        beneficiary_name: beneficiaryName || '',
+        address_english: addressEnglish || '',
+        phone_number: phoneNumber || '',
+        bank_name: bankName || '',
         swift_code: swiftCode.trim() || '',
-        bank_address: bankAddress,
-        account_number: accountNumber,
-        iban: iban.trim() || undefined,
+        bank_address: bankAddress || '',
+        account_number: accountNumber || '',
+        iban: iban.trim() || '',
       };
     }
 
@@ -124,40 +125,49 @@ export function OnboardingWizard({
   };
 
   const handleNext = async () => {
+    setErrorMsg(null);
     try {
       await saveCurrentStepData();
       if (step < TOTAL_STEPS - 1) {
-        setStep(step + 1);
-        await onSaveProgress(step + 1);
+        const nextStep = step + 1;
+        setStep(nextStep);
+        await onSaveProgress(nextStep);
       }
     } catch (err) {
       console.error('Error in handleNext:', err);
+      setErrorMsg('儲存失敗，請稍後再試');
     }
   };
 
   const handlePrev = () => {
+    setErrorMsg(null);
     if (step > 0) {
       setStep(step - 1);
     }
   };
 
   const handleFinish = async () => {
+    setErrorMsg(null);
     try {
       await saveCurrentStepData();
       await onComplete();
     } catch (err) {
       console.error('Error in handleFinish:', err);
+      setErrorMsg('儲存失敗，請稍後再試');
     }
   };
 
   const handleSkipStep = async () => {
+    setErrorMsg(null);
     try {
       if (step < TOTAL_STEPS - 1) {
-        setStep(step + 1);
-        await onSaveProgress(step + 1);
+        const nextStep = step + 1;
+        setStep(nextStep);
+        await onSaveProgress(nextStep);
       }
     } catch (err) {
       console.error('Error in handleSkipStep:', err);
+      setErrorMsg('儲存失敗，請稍後再試');
     }
   };
 
@@ -243,7 +253,7 @@ export function OnboardingWizard({
                   className="flex-1 min-w-0 rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white text-sm placeholder:text-white/40"
                 />
                 <input
-                  type="url"
+                  type="text"
                   value={link.url}
                   onChange={(e) => updateSnsLink(index, 'url', e.target.value)}
                   placeholder="https://..."
@@ -538,6 +548,11 @@ export function OnboardingWizard({
             <p className="text-center text-white/40 font-mono text-xs mb-4">
               {t('onboardingStep', { current: step, total: TOTAL_STEPS - 2 })}
             </p>
+          )}
+          {errorMsg && (
+            <div className="mb-4 rounded border border-red-500/50 bg-red-500/10 px-4 py-2 text-red-400 font-mono text-sm">
+              {errorMsg}
+            </div>
           )}
           {renderStep()}
           {renderButtons()}

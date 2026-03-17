@@ -118,7 +118,7 @@ export function useOnboarding() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        return;
+        throw new Error('User not authenticated');
       }
 
       const updateData: Record<string, unknown> = {
@@ -133,15 +133,13 @@ export function useOnboarding() {
 
       if (error) {
         console.error('Failed to save onboarding progress:', error);
-        return;
+        throw new Error(error.message);
       }
 
       setCurrentStep(step);
       if (data) {
         setProfile(prev => prev ? { ...prev, ...data, onboarding_step: step } : null);
       }
-    } catch (err) {
-      console.error('Error saving onboarding progress:', err);
     } finally {
       setSaving(false);
     }
@@ -152,7 +150,7 @@ export function useOnboarding() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        return;
+        throw new Error('User not authenticated');
       }
 
       const { error } = await supabase
@@ -165,7 +163,7 @@ export function useOnboarding() {
 
       if (error) {
         console.error('Failed to complete onboarding:', error);
-        return;
+        throw new Error(error.message);
       }
 
       setProfile(prev => prev ? {
@@ -174,8 +172,6 @@ export function useOnboarding() {
         onboarding_completed_at: new Date().toISOString(),
       } : null);
       setShowOnboarding(false);
-    } catch (err) {
-      console.error('Error completing onboarding:', err);
     } finally {
       setSaving(false);
     }

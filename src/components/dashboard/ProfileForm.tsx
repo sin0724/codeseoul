@@ -43,6 +43,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   const [iban, setIban] = useState(profile?.bank_info?.iban ?? '');
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [upgradeLoading, setUpgradeLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -93,34 +94,46 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     e.preventDefault();
     setLoading(true);
     setSaveSuccess(false);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const validLinks = snsLinks.filter((l) => l.url?.trim());
-    const parsedFollower = parseFollowerCount(followerInput);
-    await supabase
-      .from('profiles')
-      .update({
-        full_name: fullName,
-        sns_links: validLinks.length > 0 ? validLinks : [],
-        follower_count: parsedFollower ?? null,
-        line_id: lineId.trim() || null,
-        kakao_id: kakaoId.trim() || null,
-        bank_info: {
-          beneficiary_name: beneficiaryName,
-          address_english: addressEnglish,
-          phone_number: phoneNumber,
-          bank_name: bankName,
-          swift_code: swiftCode.trim() || '',
-          bank_address: bankAddress,
-          account_number: accountNumber,
-          iban: iban.trim() || undefined,
-        },
-      })
-      .eq('id', user.id);
-    setLoading(false);
-    setSaveSuccess(true);
-    router.refresh();
-    setTimeout(() => setSaveSuccess(false), 3000);
+    setSaveError(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const validLinks = snsLinks.filter((l) => l.url?.trim());
+      const parsedFollower = parseFollowerCount(followerInput);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName || null,
+          sns_links: validLinks.length > 0 ? validLinks : [],
+          follower_count: parsedFollower ?? null,
+          line_id: lineId.trim() || null,
+          kakao_id: kakaoId.trim() || null,
+          bank_info: {
+            beneficiary_name: beneficiaryName || '',
+            address_english: addressEnglish || '',
+            phone_number: phoneNumber || '',
+            bank_name: bankName || '',
+            swift_code: swiftCode.trim() || '',
+            bank_address: bankAddress || '',
+            account_number: accountNumber || '',
+            iban: iban.trim() || '',
+          },
+        })
+        .eq('id', user.id);
+      if (error) {
+        console.error('Profile save error:', error);
+        setSaveError(zhTW.saveFailed ?? '儲存失敗，請稍後再試');
+        return;
+      }
+      setSaveSuccess(true);
+      router.refresh();
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error('Profile save exception:', err);
+      setSaveError(zhTW.saveFailed ?? '儲存失敗，請稍後再試');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTierUpgradeRequest = async () => {
@@ -212,6 +225,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           {zhTW.saved}
         </div>
       )}
+      {saveError && (
+        <div className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500/10 px-4 py-2 text-red-400 font-mono text-sm">
+          {saveError}
+        </div>
+      )}
       <div>
         <label className="block text-sm text-white/80 mb-1 font-mono">{zhTW.name}</label>
         <input
@@ -242,7 +260,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                 className="flex-1 min-w-0 rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white text-sm placeholder:text-white/40"
               />
               <input
-                type="url"
+                type="text"
                 value={link.url}
                 onChange={(e) => updateSnsLink(index, 'url', e.target.value)}
                 placeholder="https://..."
