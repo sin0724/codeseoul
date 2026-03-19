@@ -16,6 +16,7 @@ export interface ProfileCompletionResult {
   checks: {
     snsLinks: boolean;
     followerCount: boolean;
+    contact: boolean;
   };
   missingFields: string[];
 }
@@ -27,26 +28,30 @@ export function calculateProfileCompletion(profile: OnboardingProfile | null): P
       checks: {
         snsLinks: false,
         followerCount: false,
+        contact: false,
       },
-      missingFields: ['snsLinks', 'followerCount'],
+      missingFields: ['snsLinks', 'followerCount', 'contact'],
     };
   }
 
   const snsLinks = (profile as { sns_links?: SnsLink[] }).sns_links;
   const hasSnsLinks = Array.isArray(snsLinks) && snsLinks.length > 0 && snsLinks.some(l => l.url?.trim());
+  const hasContact = !!(profile.line_id?.trim() || profile.kakao_id?.trim());
 
   const checks = {
     snsLinks: hasSnsLinks,
     followerCount: profile.follower_count != null && profile.follower_count > 0,
+    contact: hasContact,
   };
 
-  const totalItems = 2;
+  const totalItems = 3;
   const completedCount = Object.values(checks).filter(Boolean).length;
   const percentage = Math.round((completedCount / totalItems) * 100);
 
   const missingFields: string[] = [];
   if (!checks.snsLinks) missingFields.push('snsLinks');
   if (!checks.followerCount) missingFields.push('followerCount');
+  if (!checks.contact) missingFields.push('contact');
 
   return { percentage, checks, missingFields };
 }

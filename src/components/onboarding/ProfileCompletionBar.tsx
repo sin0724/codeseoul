@@ -1,6 +1,6 @@
 'use client';
 
-import { Instagram, Users, Check } from 'lucide-react';
+import { Instagram, Users, Check, MessageCircle } from 'lucide-react';
 import { zhTW } from '@/messages/kol/zh-TW';
 import type { ProfileCompletionResult } from '@/hooks/useOnboarding';
 
@@ -13,6 +13,7 @@ interface ProfileCompletionBarProps {
 const completionItems = [
   { key: 'snsLinks', icon: Instagram, label: 'Instagram' },
   { key: 'followerCount', icon: Users, label: '粉絲數' },
+  { key: 'contact', icon: MessageCircle, label: '聯繫方式' },
 ] as const;
 
 export function ProfileCompletionBar({ completion, showDetails = false, onComplete }: ProfileCompletionBarProps) {
@@ -41,7 +42,7 @@ export function ProfileCompletionBar({ completion, showDetails = false, onComple
       </div>
 
       {showDetails && (
-        <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="grid grid-cols-3 gap-3 mt-4">
           {completionItems.map(({ key, icon: Icon, label }) => {
             const isComplete = checks[key as keyof typeof checks];
             return (
@@ -99,7 +100,7 @@ export function ProfileCompletionBanner({ completion, onComplete, onDismiss }: P
             <span className="text-[#FF0000] font-mono font-bold text-sm">⚠️ {zhTW.profileCompletionBannerTitle}</span>
             <span className="text-white/60 font-mono text-xs">({percentage}%)</span>
           </div>
-          <p className="text-white/70 font-mono text-sm">請填寫 Instagram 連結和粉絲數以申請任務。</p>
+          <p className="text-white/70 font-mono text-sm">請填寫 Instagram 連結、粉絲數和聯繫方式以申請任務。</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button

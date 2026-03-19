@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronRight, ChevronLeft, Check, Instagram } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Check, Instagram, MessageCircle } from 'lucide-react';
 import { zhTW } from '@/messages/kol/zh-TW';
 import { ProfileCompletionBar } from './ProfileCompletionBar';
 import { parseFollowerCount } from '@/lib/codeseoul/follower-utils';
@@ -19,7 +19,7 @@ interface OnboardingWizardProps {
   onClose: () => void;
 }
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 function getInstagramUrl(profile: OnboardingProfile | null): string {
   if (!profile) return '';
@@ -52,6 +52,8 @@ export function OnboardingWizard({
     profile?.follower_count != null ? String(profile.follower_count) : ''
   );
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
+  const [lineId, setLineId] = useState(profile?.line_id ?? '');
+  const [kakaoId, setKakaoId] = useState(profile?.kakao_id ?? '');
 
   useEffect(() => {
     setMounted(true);
@@ -63,6 +65,8 @@ export function OnboardingWizard({
       setInstagramUrl(getInstagramUrl(profile));
       setFollowerInput(profile.follower_count != null ? String(profile.follower_count) : '');
       setFullName(profile.full_name ?? '');
+      setLineId(profile.line_id ?? '');
+      setKakaoId(profile.kakao_id ?? '');
     }
   }, [profile]);
 
@@ -76,6 +80,8 @@ export function OnboardingWizard({
       full_name: fullName || null,
       follower_count: parsedFollower ?? null,
       sns_links: snsLinks,
+      line_id: lineId.trim() || null,
+      kakao_id: kakaoId.trim() || null,
     };
 
     await onSaveProgress(step, data);
@@ -206,6 +212,39 @@ export function OnboardingWizard({
     </div>
   );
 
+  const renderContactStep = () => (
+    <div>
+      <div className="flex items-center gap-2 mb-1">
+        <MessageCircle className="w-5 h-5 text-[#FF0000]" />
+        <h2 className="text-xl font-bold font-mono">{zhTW.onboardingStepContact}</h2>
+      </div>
+      <p className="text-white/50 font-mono text-sm mb-2">{zhTW.onboardingStepContactDesc}</p>
+      <p className="text-white/40 font-mono text-xs mb-6">{zhTW.onboardingStepContactHint}</p>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm text-white/80 mb-1 font-mono">{zhTW.lineId}</label>
+          <input
+            value={lineId}
+            onChange={(e) => setLineId(e.target.value)}
+            placeholder="예: line_id123"
+            className="w-full rounded border border-white/20 bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-white/80 mb-1 font-mono">{zhTW.kakaoId}</label>
+          <input
+            value={kakaoId}
+            onChange={(e) => setKakaoId(e.target.value)}
+            placeholder="예: kakao_id123"
+            className="w-full rounded border border-white/20 bg-black/50 px-4 py-3 font-mono text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderCompleteStep = () => (
     <div className="text-center">
       <h2 className="text-2xl font-bold font-mono mb-2">{zhTW.onboardingCompleteTitle}</h2>
@@ -232,6 +271,8 @@ export function OnboardingWizard({
       case 1:
         return renderMainInfoStep();
       case 2:
+        return renderContactStep();
+      case 3:
         return renderCompleteStep();
       default:
         return null;
@@ -281,6 +322,20 @@ export function OnboardingWizard({
       );
     }
 
+    const handleSkipStep = async () => {
+      setErrorMsg(null);
+      try {
+        if (step < TOTAL_STEPS - 1) {
+          const nextStep = step + 1;
+          setStep(nextStep);
+          await onSaveProgress(nextStep);
+        }
+      } catch (err) {
+        console.error('Error in handleSkipStep:', err);
+        setErrorMsg('儲存失敗，請稍後再試');
+      }
+    };
+
     return (
       <div className="flex gap-3 mt-6">
         <button
@@ -290,6 +345,14 @@ export function OnboardingWizard({
           <ChevronLeft className="w-4 h-4" />
           {zhTW.onboardingPrev}
         </button>
+        {step === 2 && (
+          <button
+            onClick={handleSkipStep}
+            className="rounded border border-white/20 px-4 py-2 font-mono text-white/60 hover:bg-white/5 transition-colors"
+          >
+            {zhTW.onboardingLater}
+          </button>
+        )}
         <button
           onClick={handleNext}
           disabled={saving}
