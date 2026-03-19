@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { Profile, SnsLink, BankInfo } from '@/lib/codeseoul/types';
+import type { Profile, SnsLink } from '@/lib/codeseoul/types';
 
 export interface OnboardingProfile extends Profile {
   onboarding_completed?: boolean;
@@ -14,11 +14,8 @@ export interface OnboardingProfile extends Profile {
 export interface ProfileCompletionResult {
   percentage: number;
   checks: {
-    fullName: boolean;
-    followerCount: boolean;
     snsLinks: boolean;
-    contact: boolean;
-    bankInfo: boolean;
+    followerCount: boolean;
   };
   missingFields: string[];
 }
@@ -28,43 +25,28 @@ export function calculateProfileCompletion(profile: OnboardingProfile | null): P
     return {
       percentage: 0,
       checks: {
-        fullName: false,
-        followerCount: false,
         snsLinks: false,
-        contact: false,
-        bankInfo: false,
+        followerCount: false,
       },
-      missingFields: ['fullName', 'followerCount', 'snsLinks', 'contact', 'bankInfo'],
+      missingFields: ['snsLinks', 'followerCount'],
     };
   }
 
   const snsLinks = (profile as { sns_links?: SnsLink[] }).sns_links;
   const hasSnsLinks = Array.isArray(snsLinks) && snsLinks.length > 0 && snsLinks.some(l => l.url?.trim());
-  const hasContact = !!(profile.line_id?.trim() || profile.kakao_id?.trim());
-  const bankInfo = profile.bank_info as BankInfo | undefined;
-  const hasBankInfo = !!(
-    bankInfo?.beneficiary_name?.trim() &&
-    bankInfo?.bank_name?.trim() &&
-    bankInfo?.account_number?.trim()
-  );
 
   const checks = {
-    fullName: !!profile.full_name?.trim(),
-    followerCount: profile.follower_count != null && profile.follower_count > 0,
     snsLinks: hasSnsLinks,
-    contact: hasContact,
-    bankInfo: hasBankInfo,
+    followerCount: profile.follower_count != null && profile.follower_count > 0,
   };
 
+  const totalItems = 2;
   const completedCount = Object.values(checks).filter(Boolean).length;
-  const percentage = Math.round((completedCount / 5) * 100);
+  const percentage = Math.round((completedCount / totalItems) * 100);
 
   const missingFields: string[] = [];
-  if (!checks.fullName) missingFields.push('fullName');
-  if (!checks.followerCount) missingFields.push('followerCount');
   if (!checks.snsLinks) missingFields.push('snsLinks');
-  if (!checks.contact) missingFields.push('contact');
-  if (!checks.bankInfo) missingFields.push('bankInfo');
+  if (!checks.followerCount) missingFields.push('followerCount');
 
   return { percentage, checks, missingFields };
 }

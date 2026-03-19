@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Instagram, Phone, CreditCard, Check } from 'lucide-react';
+import { Instagram, Users, Check } from 'lucide-react';
 import { zhTW } from '@/messages/kol/zh-TW';
 import type { ProfileCompletionResult } from '@/hooks/useOnboarding';
 
@@ -11,11 +11,8 @@ interface ProfileCompletionBarProps {
 }
 
 const completionItems = [
-  { key: 'fullName', icon: User, label: '姓名' },
-  { key: 'followerCount', icon: User, label: '粉絲數' },
-  { key: 'snsLinks', icon: Instagram, label: '社群連結' },
-  { key: 'contact', icon: Phone, label: '聯繫方式' },
-  { key: 'bankInfo', icon: CreditCard, label: '付款資訊' },
+  { key: 'snsLinks', icon: Instagram, label: 'Instagram' },
+  { key: 'followerCount', icon: Users, label: '粉絲數' },
 ] as const;
 
 export function ProfileCompletionBar({ completion, showDetails = false, onComplete }: ProfileCompletionBarProps) {
@@ -23,7 +20,7 @@ export function ProfileCompletionBar({ completion, showDetails = false, onComple
 
   const getProgressColor = () => {
     if (percentage >= 100) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
+    if (percentage >= 50) return 'bg-yellow-500';
     return 'bg-[#FF0000]';
   };
 
@@ -44,25 +41,25 @@ export function ProfileCompletionBar({ completion, showDetails = false, onComple
       </div>
 
       {showDetails && (
-        <div className="grid grid-cols-5 gap-2 mt-4">
+        <div className="grid grid-cols-2 gap-3 mt-4">
           {completionItems.map(({ key, icon: Icon, label }) => {
             const isComplete = checks[key as keyof typeof checks];
             return (
               <div
                 key={key}
-                className={`flex flex-col items-center gap-1 p-2 rounded border transition-colors ${
+                className={`flex items-center gap-3 p-3 rounded border transition-colors ${
                   isComplete
                     ? 'border-green-500/30 bg-green-500/10'
-                    : 'border-white/10 bg-white/5'
+                    : 'border-[#FF0000]/30 bg-[#FF0000]/5'
                 }`}
               >
-                <div className={`relative ${isComplete ? 'text-green-400' : 'text-white/40'}`}>
-                  <Icon className="w-4 h-4" />
+                <div className={`relative ${isComplete ? 'text-green-400' : 'text-[#FF0000]'}`}>
+                  <Icon className="w-5 h-5" />
                   {isComplete && (
                     <Check className="absolute -top-1 -right-1 w-3 h-3 text-green-400" />
                   )}
                 </div>
-                <span className={`text-[10px] font-mono ${isComplete ? 'text-green-400' : 'text-white/40'}`}>
+                <span className={`text-sm font-mono ${isComplete ? 'text-green-400' : 'text-white/60'}`}>
                   {label}
                 </span>
               </div>
@@ -100,9 +97,9 @@ export function ProfileCompletionBanner({ completion, onComplete, onDismiss }: P
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[#FF0000] font-mono font-bold text-sm">⚠️ {zhTW.profileCompletionBannerTitle}</span>
-            <span className="text-white/60 font-mono text-xs">({percentage}% {zhTW.profileCompletion})</span>
+            <span className="text-white/60 font-mono text-xs">({percentage}%)</span>
           </div>
-          <p className="text-white/70 font-mono text-sm">{zhTW.profileCompletionBannerDesc}</p>
+          <p className="text-white/70 font-mono text-sm">請填寫 Instagram 連結和粉絲數以申請任務。</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
