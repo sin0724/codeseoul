@@ -252,7 +252,7 @@ export function AgentPerformanceTab() {
             <CheckCircle className="w-4 h-4" />
             완료 미션
           </div>
-          <p className="text-2xl font-mono font-bold text-[#FF0000]">{totals.completedMissions}</p>
+          <p className="text-2xl font-mono font-bold text-[#E11D48]">{totals.completedMissions}</p>
         </div>
       </div>
 
@@ -298,7 +298,7 @@ export function AgentPerformanceTab() {
                       </td>
                       <td className="py-3 px-4 font-mono text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-[#FF0000] font-bold">{s.agent.agent_code}</span>
+                          <span className="text-[#E11D48] font-bold">{s.agent.agent_code}</span>
                           <CopyButton text={s.agent.agent_code} />
                         </div>
                       </td>
@@ -306,7 +306,7 @@ export function AgentPerformanceTab() {
                       <td className="py-3 px-4 font-mono text-sm text-center text-green-400">
                         {s.approvedKols}
                       </td>
-                      <td className="py-3 px-4 font-mono text-sm text-center text-[#FF0000]">
+                      <td className="py-3 px-4 font-mono text-sm text-center text-[#E11D48]">
                         {s.completedMissions}
                       </td>
                       <td className="py-3 px-4 text-center">
@@ -366,7 +366,7 @@ export function AgentPerformanceTab() {
                                         </div>
                                         <div className="flex items-center gap-3">
                                           <span className="font-mono text-xs text-white/40">
-                                            완료 미션: <span className="text-[#FF0000]">{kol.applications?.length ?? 0}</span>
+                                            완료 미션: <span className="text-[#E11D48]">{kol.applications?.length ?? 0}</span>
                                           </span>
                                           <div className="flex items-center gap-1">
                                             <button
@@ -430,7 +430,7 @@ export function AgentPerformanceTab() {
                                                       href={app.result_url}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
-                                                      className="text-[#FF0000] hover:underline"
+                                                      className="text-[#E11D48] hover:underline"
                                                       onClick={(e) => e.stopPropagation()}
                                                     >
                                                       결과물 보기
@@ -494,7 +494,7 @@ export function AgentPerformanceTab() {
                 <select
                   value={targetAgentId}
                   onChange={(e) => setTargetAgentId(e.target.value)}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#FF0000] focus:outline-none"
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#E11D48] focus:outline-none"
                 >
                   <option value="">에이전트를 선택하세요</option>
                   {allAgents

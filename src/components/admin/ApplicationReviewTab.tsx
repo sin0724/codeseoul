@@ -179,10 +179,10 @@ export function ApplicationReviewTab() {
           <button
             key={opt.value}
             onClick={() => handleFilterChange(opt.value)}
-            className={`px-3 py-1.5 rounded text-sm font-mono transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
               statusFilter === opt.value
-                ? 'bg-[#FF0000] text-white'
-                : 'border border-white/10 text-white/70 hover:border-white/30'
+                ? 'bg-[#E11D48] text-white shadow-sm shadow-[#E11D48]/20'
+                : 'border border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.06] hover:text-white/80'
             }`}
           >
             {opt.label}
@@ -198,24 +198,24 @@ export function ApplicationReviewTab() {
       </p>
 
       {applications.length === 0 ? (
-        <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
-          <p className="text-white/50 font-mono">{emptyMessages[statusFilter]}</p>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+          <p className="text-white/40 font-mono text-sm">{emptyMessages[statusFilter]}</p>
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 font-mono text-white/80">미션</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">KOL</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">팔로워</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">티어</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">SNS URL</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">상태</th>
-                  <th className="text-left py-3 px-4 font-mono text-white/80">지원일</th>
+                <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">미션</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">KOL</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">팔로워</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">티어</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">SNS URL</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">상태</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">지원일</th>
                   {statusFilter === 'applied' && (
-                    <th className="text-right py-3 px-4 font-mono text-white/80">액션</th>
+                    <th className="text-right py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">액션</th>
                   )}
                 </tr>
               </thead>
@@ -228,21 +228,21 @@ export function ApplicationReviewTab() {
                       key={app.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b border-white/5 hover:bg-white/5"
+                      className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors"
                     >
-                      <td className="py-3 px-4 font-mono">
+                      <td className="py-3 px-4 font-mono text-white/80">
                         {c?.title} ({c?.brand_name})
                       </td>
-                      <td className="py-3 px-4 font-mono">
+                      <td className="py-3 px-4 font-mono text-white/80">
                         {p?.full_name ?? '-'} ({p?.email})
                       </td>
-                      <td className="py-3 px-4 font-mono">
+                      <td className="py-3 px-4 font-mono text-white/70">
                         {p?.follower_count != null
                           ? p.follower_count.toLocaleString()
                           : '-'}
                       </td>
                       <td className="py-3 px-4 font-mono">
-                        <span className="text-[#FF0000]">{p?.tier ?? '-'}</span>
+                        <span className="font-bold text-[#E11D48]">{p?.tier ?? '-'}</span>
                       </td>
                       <td className="py-3 px-4 font-mono">
                         {(() => {
@@ -258,7 +258,7 @@ export function ApplicationReviewTab() {
                                   href={normalizeUrl(l.url)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[#FF0000] hover:underline"
+                                  className="inline-flex items-center gap-1 text-[#E11D48] hover:underline"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
                                   {l.label || 'SNS'}
@@ -276,19 +276,19 @@ export function ApplicationReviewTab() {
                       </td>
                       {statusFilter === 'applied' && (
                         <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleSelect(app.id, app.kol_id, c?.title)}
-                              className="inline-flex items-center gap-1 rounded bg-[#FF0000] px-3 py-1.5 text-sm font-mono text-white hover:bg-[#cc0000]"
+                              className="inline-flex items-center gap-1 rounded-lg bg-green-600/20 border border-green-600/30 px-2.5 py-1.5 text-xs font-mono text-green-400 hover:bg-green-600/30 transition-all"
                             >
-                              <Check className="w-4 h-4" />
+                              <Check className="w-3 h-3" />
                               선정
                             </button>
                             <button
                               onClick={() => handleReject(app.id, app.kol_id, c?.title)}
-                              className="inline-flex items-center gap-1 rounded bg-white/10 px-3 py-1.5 text-sm font-mono text-white/80 hover:bg-white/20 border border-white/20"
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs font-mono text-white/60 hover:bg-white/[0.08] transition-all"
                             >
-                              <X className="w-4 h-4" />
+                              <X className="w-3 h-3" />
                               거절
                             </button>
                           </div>

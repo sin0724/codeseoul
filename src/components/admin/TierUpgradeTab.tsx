@@ -110,8 +110,8 @@ export function TierUpgradeTab() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded border border-[#FF0000]/30 bg-[#FF0000]/5 px-4 py-3 font-mono text-sm mb-4">
-        <p className="text-[#FF0000] font-medium">※ 안내</p>
+      <div className="rounded border border-[#E11D48]/30 bg-[#E11D48]/5 px-4 py-3 font-mono text-sm mb-4">
+        <p className="text-[#E11D48] font-medium">※ 안내</p>
         <p className="text-white/90 mt-1">KOL의 팔로워 수와 요청 티어를 확인 후 승인 또는 반려해 주세요.</p>
       </div>
       <div className="overflow-x-auto">
@@ -157,7 +157,7 @@ export function TierUpgradeTab() {
                   </td>
                   <td className="py-3 px-4">
                     {requestedInfo ? (
-                      <span className="font-mono text-[#FF0000]">{requestedInfo.id}</span>
+                      <span className="font-mono text-[#E11D48]">{requestedInfo.id}</span>
                     ) : (
                       '-'
                     )}

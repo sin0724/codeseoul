@@ -134,7 +134,7 @@ export function PayoutStatsTab() {
               onClick={() => setMode(m)}
               className={`px-4 py-2 rounded font-mono text-sm transition-colors ${
                 mode === m
-                  ? 'bg-[#FF0000] text-white'
+                  ? 'bg-[#E11D48] text-white'
                   : 'border border-white/10 text-white/70 hover:bg-white/5'
               }`}
             >
@@ -159,10 +159,10 @@ export function PayoutStatsTab() {
 
       <div className="rounded border border-white/10 bg-white/5 p-6">
         <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-5 h-5 text-[#FF0000]" />
+          <BarChart3 className="w-5 h-5 text-[#E11D48]" />
           <span className="font-mono font-bold text-white">총 지급 완료 금액</span>
         </div>
-        <p className="text-3xl font-mono font-bold text-[#FF0000]">
+        <p className="text-3xl font-mono font-bold text-[#E11D48]">
           {loading ? '...' : totalSum.toLocaleString()} TWD
         </p>
       </div>
@@ -195,7 +195,7 @@ export function PayoutStatsTab() {
               {data.map((row, i) => (
                 <tr key={i} className="border-b border-white/5 hover:bg-white/5">
                   {mode === 'brand' && (
-                    <td className="py-3 px-4 font-mono text-[#FF0000]">{row.brand_name}</td>
+                    <td className="py-3 px-4 font-mono text-[#E11D48]">{row.brand_name}</td>
                   )}
                   {mode === 'monthly' && row.month && (
                     <td className="py-3 px-4 font-mono">{row.month}월</td>

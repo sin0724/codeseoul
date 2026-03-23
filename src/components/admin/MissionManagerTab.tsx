@@ -234,29 +234,29 @@ export function MissionManagerTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 border-b border-white/10 pb-2">
+      <div className="flex gap-2 border-b border-white/[0.06] pb-3">
         <button
           onClick={() => setSubTab('register')}
-          className={`flex items-center gap-2 px-4 py-2 rounded font-mono text-sm transition-colors ${
-            subTab === 'register' ? 'bg-[#FF0000] text-white' : 'border border-white/10 text-white/70 hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm transition-all ${
+            subTab === 'register' ? 'bg-[#E11D48] text-white shadow-sm shadow-[#E11D48]/20' : 'border border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.06]'
           }`}
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           새 미션 등록
         </button>
         <button
           onClick={() => setSubTab('list')}
-          className={`flex items-center gap-2 px-4 py-2 rounded font-mono text-sm transition-colors ${
-            subTab === 'list' ? 'bg-[#FF0000] text-white' : 'border border-white/10 text-white/70 hover:bg-white/5'
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm transition-all ${
+            subTab === 'list' ? 'bg-[#E11D48] text-white shadow-sm shadow-[#E11D48]/20' : 'border border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.06]'
           }`}
         >
-          <List className="w-4 h-4" />
+          <List className="w-3.5 h-3.5" />
           등록된 미션
         </button>
       </div>
 
       {subTab === 'register' ? (
-        <form onSubmit={handleSubmit} className="space-y-4 rounded border border-white/10 bg-white/5 p-6">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
           <h2 className="font-mono font-bold text-white">
             {editingId ? '미션 수정' : '새 미션 등록'}
           </h2>
@@ -275,7 +275,7 @@ export function MissionManagerTab() {
                 type="file"
                 accept="image/*"
                 onChange={onImageChange}
-                className="text-sm font-mono text-white/80 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#FF0000] file:text-white file:text-sm"
+                className="text-sm font-mono text-white/80 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#E11D48] file:text-white file:text-sm"
               />
             </div>
           </div>
@@ -287,7 +287,7 @@ export function MissionManagerTab() {
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 required
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -296,7 +296,7 @@ export function MissionManagerTab() {
                 value={form.brand_name}
                 onChange={(e) => setForm((f) => ({ ...f, brand_name: e.target.value }))}
                 required
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -309,7 +309,7 @@ export function MissionManagerTab() {
                     platform: e.target.value as CampaignPlatform,
                   }))
                 }
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               >
                 <option value="instagram">Instagram</option>
                 <option value="youtube">YouTube</option>
@@ -322,7 +322,7 @@ export function MissionManagerTab() {
               value={form.guide_content}
               onChange={(e) => setForm((f) => ({ ...f, guide_content: e.target.value }))}
               rows={4}
-              className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -332,7 +332,7 @@ export function MissionManagerTab() {
                 type="url"
                 value={form.guide_url}
                 onChange={(e) => setForm((f) => ({ ...f, guide_url: e.target.value }))}
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ export function MissionManagerTab() {
                 }
                 required
                 min={0}
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
           </div>
@@ -359,7 +359,7 @@ export function MissionManagerTab() {
                 type="date"
                 value={form.deadline}
                 onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -372,7 +372,7 @@ export function MissionManagerTab() {
                 }
                 min={0}
                 placeholder="선택"
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white placeholder:text-white/40"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white placeholder:text-white/30 focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -385,7 +385,7 @@ export function MissionManagerTab() {
                     status: e.target.value as 'active' | 'closed',
                   }))
                 }
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               >
                 <option value="active">active</option>
                 <option value="closed">closed</option>
@@ -420,7 +420,7 @@ export function MissionManagerTab() {
                 value={form.contact_line}
                 onChange={(e) => setForm((f) => ({ ...f, contact_line: e.target.value }))}
                 placeholder="URL 또는 ID"
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
             <div>
@@ -429,14 +429,14 @@ export function MissionManagerTab() {
                 value={form.contact_kakao}
                 onChange={(e) => setForm((f) => ({ ...f, contact_kakao: e.target.value }))}
                 placeholder="URL 또는 ID"
-                className="w-full rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-white"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
               />
             </div>
           </div>
           <div className="flex gap-2">
             <button
               type="submit"
-              className="rounded bg-[#FF0000] px-4 py-2 font-mono font-bold text-white hover:bg-[#cc0000]"
+              className="rounded bg-[#E11D48] px-4 py-2 font-mono font-bold text-white hover:bg-[#cc0000]"
             >
               {editingId ? '수정' : '등록'}
             </button>
@@ -466,10 +466,10 @@ export function MissionManagerTab() {
             </div>
           </div>
           {loading ? (
-            <p className="text-white/60 font-mono">로딩 중...</p>
+            <p className="text-white/40 font-mono text-sm">로딩 중...</p>
           ) : filteredCampaigns.length === 0 ? (
-            <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
-              <p className="text-white/50 font-mono">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+              <p className="text-white/40 font-mono text-sm">
                 {searchQuery.trim() ? '검색 결과가 없습니다.' : '등록된 미션이 없습니다.'}
               </p>
             </div>
@@ -480,7 +480,7 @@ export function MissionManagerTab() {
                   key={c.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/10 bg-white/5 p-4"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     {(c as { brand_image_url?: string }).brand_image_url && (
@@ -520,7 +520,7 @@ export function MissionManagerTab() {
                         />
                         <button
                           onClick={() => handleExtendDeadline(c.id)}
-                          className="rounded bg-[#FF0000] px-2 py-1 text-sm font-mono text-white hover:bg-[#cc0000]"
+                          className="rounded bg-[#E11D48] px-2 py-1 text-sm font-mono text-white hover:bg-[#cc0000]"
                         >
                           연장
                         </button>
@@ -549,13 +549,13 @@ export function MissionManagerTab() {
                     )}
                     <button
                       onClick={() => handleEdit(c)}
-                      className="rounded border border-[#FF0000]/50 px-3 py-1 text-sm text-[#FF0000] font-mono hover:bg-[#FF0000]/10"
+                      className="rounded border border-[#E11D48]/50 px-3 py-1 text-sm text-[#E11D48] font-mono hover:bg-[#E11D48]/10"
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDelete(c.id, c.title)}
-                      className="flex items-center gap-1 rounded border border-white/20 px-3 py-1 text-sm text-white/60 font-mono hover:bg-[#FF0000]/20 hover:text-[#FF0000] hover:border-[#FF0000]/50"
+                      className="flex items-center gap-1 rounded border border-white/20 px-3 py-1 text-sm text-white/60 font-mono hover:bg-[#E11D48]/20 hover:text-[#E11D48] hover:border-[#E11D48]/50"
                     >
                       <Trash2 className="w-4 h-4" />
                       삭제

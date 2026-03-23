@@ -112,30 +112,30 @@ export function PayoutQueueTab() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
-        <p className="text-white/50 font-mono">정산 대기 중인 건이 없습니다.</p>
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+        <p className="text-white/40 font-mono text-sm">정산 대기 중인 건이 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-white/10">
-            <th className="text-left py-3 px-4 font-mono text-white/80">브랜드명</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">게시글 링크</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">KOL 이름</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">수취인 영문</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">영문주소</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">전화번호</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">은행 영문 명칭</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">SWIFT (BIC)</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">은행 주소</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">계좌번호</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">IBAN</th>
-            <th className="text-left py-3 px-4 font-mono text-white/80">정산금액</th>
-            <th className="text-right py-3 px-4 font-mono text-white/80">액션</th>
+          <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">브랜드명</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">게시글</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">KOL</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">수취인</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">영문주소</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">전화</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">은행</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">SWIFT</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">은행주소</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">계좌번호</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">IBAN</th>
+            <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">금액</th>
+            <th className="text-right py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">액션</th>
           </tr>
         </thead>
         <tbody>
@@ -150,9 +150,9 @@ export function PayoutQueueTab() {
                 key={item.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="border-b border-white/5 hover:bg-white/5"
+                className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors"
               >
-                <td className="py-3 px-4 font-mono text-[#FF0000]">
+                <td className="py-3 px-4 font-mono font-bold text-[#E11D48]">
                   {c?.brand_name ?? '-'}
                 </td>
                 <td className="py-3 px-4 max-w-[160px] overflow-hidden align-top">
@@ -162,7 +162,7 @@ export function PayoutQueueTab() {
                         href={item.result_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-xs text-[#FF0000] hover:underline whitespace-nowrap shrink-0"
+                        className="font-mono text-xs text-[#E11D48] hover:underline whitespace-nowrap shrink-0"
                         title={item.result_url}
                       >
                         링크 열기
@@ -170,25 +170,25 @@ export function PayoutQueueTab() {
                       <CopyButton text={item.result_url} label="복사" className="!text-xs shrink-0" />
                     </div>
                   ) : (
-                    <span className="text-white/40">-</span>
+                    <span className="text-white/30">-</span>
                   )}
                 </td>
-                <td className="py-3 px-4 font-mono">
+                <td className="py-3 px-4 font-mono text-white/80">
                   {p?.full_name ?? '-'}
                 </td>
-                <td className="py-3 px-4 font-mono">{beneficiary}</td>
-                <td className="py-3 px-4 font-mono text-xs">{bank.address_english || '-'}</td>
-                <td className="py-3 px-4 font-mono text-xs">{bank.phone_number || '-'}</td>
-                <td className="py-3 px-4 font-mono">{bank.bank_name || '-'}</td>
-                <td className="py-3 px-4 font-mono">{bank.swift_code || '-'}</td>
-                <td className="py-3 px-4 font-mono text-xs">{bank.bank_address || '-'}</td>
-                <td className="py-3 px-4 font-mono">{bank.account_number || '-'}</td>
-                <td className="py-3 px-4 font-mono text-xs">{bank.iban || '-'}</td>
-                <td className="py-3 px-4 font-mono">{amount.toLocaleString()} TWD</td>
+                <td className="py-3 px-4 font-mono text-white/80">{beneficiary}</td>
+                <td className="py-3 px-4 font-mono text-xs text-white/60">{bank.address_english || '-'}</td>
+                <td className="py-3 px-4 font-mono text-xs text-white/60">{bank.phone_number || '-'}</td>
+                <td className="py-3 px-4 font-mono text-white/80">{bank.bank_name || '-'}</td>
+                <td className="py-3 px-4 font-mono text-white/80">{bank.swift_code || '-'}</td>
+                <td className="py-3 px-4 font-mono text-xs text-white/60">{bank.bank_address || '-'}</td>
+                <td className="py-3 px-4 font-mono text-white/80">{bank.account_number || '-'}</td>
+                <td className="py-3 px-4 font-mono text-xs text-white/60">{bank.iban || '-'}</td>
+                <td className="py-3 px-4 font-mono font-bold">{amount.toLocaleString()} TWD</td>
                 <td className="py-3 px-4 text-right">
                   <button
                     onClick={() => handlePaid(item.id, item.kol_id, amount, c?.brand_name)}
-                    className="rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600"
+                    className="rounded-lg bg-green-600/20 border border-green-600/30 px-3 py-1.5 text-xs font-mono text-green-400 hover:bg-green-600/30 transition-all"
                   >
                     지급 완료
                   </button>

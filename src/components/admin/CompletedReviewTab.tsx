@@ -95,8 +95,8 @@ export function CompletedReviewTab() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded border border-[#FF0000]/30 bg-[#FF0000]/5 px-4 py-3 font-mono text-sm mb-4">
-        <p className="text-[#FF0000] font-medium">※ 안내</p>
+      <div className="rounded border border-[#E11D48]/30 bg-[#E11D48]/5 px-4 py-3 font-mono text-sm mb-4">
+        <p className="text-[#E11D48] font-medium">※ 안내</p>
         <p className="text-white/90 mt-1">게시글을 검토 후 광고주 컨펌을 받고 [정산 승인]하면 정산 큐로 이동합니다.</p>
       </div>
       <div className="overflow-x-auto">
@@ -122,7 +122,7 @@ export function CompletedReviewTab() {
                   animate={{ opacity: 1 }}
                   className="border-b border-white/5 hover:bg-white/5"
                 >
-                  <td className="py-3 px-4 font-mono text-[#FF0000]">
+                  <td className="py-3 px-4 font-mono text-[#E11D48]">
                     {c?.brand_name ?? '-'}
                   </td>
                   <td className="py-3 px-4 font-mono">{c?.title ?? '-'}</td>
@@ -133,7 +133,7 @@ export function CompletedReviewTab() {
                         href={item.result_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#FF0000] hover:underline font-mono text-xs max-w-[200px] truncate"
+                        className="inline-flex items-center gap-1 text-[#E11D48] hover:underline font-mono text-xs max-w-[200px] truncate"
                       >
                         <ExternalLink className="w-4 h-4 shrink-0" />
                         {item.result_url}
@@ -148,7 +148,7 @@ export function CompletedReviewTab() {
                   <td className="py-3 px-4 text-right">
                     <button
                       onClick={() => handleApprove(item.id)}
-                      className="rounded bg-[#FF0000] px-3 py-1.5 text-sm font-mono text-white hover:bg-[#cc0000] flex items-center gap-1 ml-auto"
+                      className="rounded bg-[#E11D48] px-3 py-1.5 text-sm font-mono text-white hover:bg-[#cc0000] flex items-center gap-1 ml-auto"
                     >
                       <Check className="w-4 h-4" />
                       정산 승인

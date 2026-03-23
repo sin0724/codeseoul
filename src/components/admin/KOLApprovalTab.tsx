@@ -264,7 +264,7 @@ export function KOLApprovalTab() {
             href={normalizeUrl(l.url)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[#FF0000] hover:underline text-xs"
+            className="inline-flex items-center gap-1 text-[#E11D48] hover:underline text-xs"
           >
             <ExternalLink className="w-3 h-3" />
             {l.label || 'SNS'}
@@ -283,10 +283,10 @@ export function KOLApprovalTab() {
           <button
             key={opt.value}
             onClick={() => handleFilterChange(opt.value)}
-            className={`px-3 py-1.5 rounded text-sm font-mono transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
               statusFilter === opt.value
-                ? 'bg-[#FF0000] text-white'
-                : 'border border-white/10 text-white/70 hover:border-white/30'
+                ? 'bg-[#E11D48] text-white shadow-sm shadow-[#E11D48]/20'
+                : 'border border-white/[0.08] bg-white/[0.03] text-white/60 hover:bg-white/[0.06] hover:text-white/80'
             }`}
           >
             {opt.label}
@@ -296,27 +296,27 @@ export function KOLApprovalTab() {
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="이메일 또는 이름으로 검색..."
-            className="w-full rounded border border-white/20 bg-black/50 pl-10 pr-4 py-2 font-mono text-sm text-white placeholder:text-white/40 focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] pl-9 pr-4 py-2 font-mono text-sm text-white placeholder:text-white/30 focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => { setSearchQuery(''); setDebouncedSearch(''); setPage(1); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
         <select
           value={tierFilter}
           onChange={(e) => handleTierFilterChange(e.target.value as ProgramTier | '')}
-          className="rounded border border-white/20 bg-black/50 px-3 py-2 font-mono text-sm text-white focus:border-[#FF0000] focus:outline-none focus:ring-1 focus:ring-[#FF0000]"
+          className="rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
         >
           <option value="">전체 티어</option>
           {PROGRAM_TIERS.map((t) => (
@@ -324,15 +324,15 @@ export function KOLApprovalTab() {
           ))}
         </select>
         {(debouncedSearch || tierFilter) && (
-          <span className="text-xs text-white/50 font-mono">
-            검색 결과: {totalCount}건
+          <span className="text-xs text-white/40 font-mono">
+            {totalCount}건
           </span>
         )}
       </div>
 
       {profiles.length === 0 ? (
-        <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
-          <p className="text-white/50 font-mono">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+          <p className="text-white/40 font-mono text-sm">
             {(debouncedSearch || tierFilter) ? (
               '검색 결과가 없습니다.'
             ) : (
@@ -347,68 +347,68 @@ export function KOLApprovalTab() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">이메일</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">이름</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">팔로워</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">티어</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">SNS</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">상태</th>
-                  <th className="text-left py-3 px-4 font-mono text-sm text-white/80">신청일</th>
-                  <th className="text-right py-3 px-4 font-mono text-sm text-white/80">액션</th>
+                <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">이메일</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">이름</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">팔로워</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">티어</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">SNS</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">상태</th>
+                  <th className="text-left py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">신청일</th>
+                  <th className="text-right py-3 px-4 font-mono text-xs text-white/40 uppercase tracking-wider">액션</th>
                 </tr>
               </thead>
               <tbody>
                 {profiles.map((p) => (
-                  <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4 font-mono text-sm">{p.email}</td>
+                  <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
+                    <td className="py-3 px-4 font-mono text-sm text-white/80">{p.email}</td>
                     <td className="py-3 px-4 font-mono text-sm">{p.full_name ?? '-'}</td>
-                    <td className="py-3 px-4 font-mono text-sm">
+                    <td className="py-3 px-4 font-mono text-sm text-white/70">
                       {(p as { follower_count?: number }).follower_count?.toLocaleString() ?? '-'}
                     </td>
-                    <td className="py-3 px-4 font-mono text-sm text-[#FF0000]">
+                    <td className="py-3 px-4 font-mono text-sm font-bold text-[#E11D48]">
                       {(p as { tier?: string }).tier ?? '-'}
                     </td>
                     <td className="py-3 px-4 font-mono text-sm">{renderSnsLinks(p)}</td>
                     <td className="py-3 px-4 font-mono text-sm">{getStatusBadge(p.status)}</td>
-                    <td className="py-3 px-4 font-mono text-sm text-white/60">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
+                    <td className="py-3 px-4 font-mono text-sm text-white/40">{new Date(p.created_at).toLocaleDateString('ko-KR')}</td>
                     <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => openEditModal(p)}
-                          className="inline-flex items-center gap-1 rounded bg-white/10 px-3 py-1.5 text-sm font-mono text-white/80 hover:bg-white/20 border border-white/20"
+                          className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5 text-xs font-mono text-white/70 hover:bg-white/[0.08] hover:text-white transition-all"
                         >
-                          <Pencil className="w-3.5 h-3.5" />
+                          <Pencil className="w-3 h-3" />
                           수정
                         </button>
                         {statusFilter === 'pending' && (
                           <>
-                            <button 
-                              onClick={() => handleApprove(p.id)} 
+                            <button
+                              onClick={() => handleApprove(p.id)}
                               disabled={processingId !== null}
-                              className="inline-flex items-center gap-1 rounded bg-green-600/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-1 rounded-lg bg-green-600/20 border border-green-600/30 px-2.5 py-1.5 text-xs font-mono text-green-400 hover:bg-green-600/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                             >
                               {processingId === p.id ? (
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-3 h-3 border border-green-400/30 border-t-green-400 rounded-full animate-spin" />
                               ) : (
-                                <Check className="w-4 h-4" />
+                                <Check className="w-3 h-3" />
                               )}
-                              {processingId === p.id ? '처리중...' : '승인'}
+                              {processingId === p.id ? '처리중' : '승인'}
                             </button>
-                            <button 
-                              onClick={() => handleReject(p.id)} 
+                            <button
+                              onClick={() => handleReject(p.id)}
                               disabled={processingId !== null}
-                              className="inline-flex items-center gap-1 rounded bg-[#FF0000]/80 px-3 py-1.5 text-sm font-mono text-white hover:bg-[#FF0000] disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="inline-flex items-center gap-1 rounded-lg bg-[#E11D48]/10 border border-[#E11D48]/30 px-2.5 py-1.5 text-xs font-mono text-[#E11D48] hover:bg-[#E11D48]/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                             >
                               {processingId === p.id ? (
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-3 h-3 border border-[#E11D48]/30 border-t-[#E11D48] rounded-full animate-spin" />
                               ) : (
-                                <X className="w-4 h-4" />
+                                <X className="w-3 h-3" />
                               )}
-                              {processingId === p.id ? '처리중...' : '거절'}
+                              {processingId === p.id ? '처리중' : '거절'}
                             </button>
                           </>
                         )}
@@ -424,47 +424,46 @@ export function KOLApprovalTab() {
       )}
 
       {editingProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-lg shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+          <div className="relative w-full max-w-lg bg-[#0c0c0c] border border-white/[0.08] rounded-2xl shadow-2xl">
             <button
               onClick={() => setEditingProfile(null)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white/60"
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/60 hover:bg-white/[0.06] transition-all"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="p-6 space-y-5">
-              <div>
-                <h2 className="text-lg font-bold font-mono text-white">KOL 정보 수정</h2>
-                <p className="text-sm text-white/50 font-mono mt-1">{editingProfile.email}</p>
+            <div className="p-6 space-y-4">
+              <div className="pb-2 border-b border-white/[0.06]">
+                <h2 className="text-base font-bold font-mono text-white">KOL 정보 수정</h2>
+                <p className="text-xs text-white/40 font-mono mt-0.5">{editingProfile.email}</p>
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1 font-mono">이름</label>
+                <label className="block text-xs font-mono text-white/50 mb-1.5 uppercase tracking-wider">이름</label>
                 <input
                   value={editForm.full_name}
                   onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1 font-mono">팔로워 수</label>
+                <label className="block text-xs font-mono text-white/50 mb-1.5 uppercase tracking-wider">팔로워 수</label>
                 <input
                   value={editForm.follower_count}
                   onChange={(e) => setEditForm(prev => ({ ...prev, follower_count: e.target.value }))}
                   placeholder="예: 10000"
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white placeholder:text-white/40"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white placeholder:text-white/30 focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
                 />
-                <p className="text-xs text-white/40 font-mono mt-1">숫자만 입력 (예: 10000, 50000)</p>
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1 font-mono">티어</label>
+                <label className="block text-xs font-mono text-white/50 mb-1.5 uppercase tracking-wider">티어</label>
                 <select
                   value={editForm.tier}
                   onChange={(e) => setEditForm(prev => ({ ...prev, tier: e.target.value as ProgramTier | '' }))}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
                 >
                   <option value="">미지정</option>
                   {PROGRAM_TIERS.map((t) => (
@@ -475,36 +474,36 @@ export function KOLApprovalTab() {
                 </select>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm text-white/80 mb-1 font-mono">LINE ID</label>
+                  <label className="block text-xs font-mono text-white/50 mb-1.5 uppercase tracking-wider">LINE ID</label>
                   <input
                     value={editForm.line_id}
                     onChange={(e) => setEditForm(prev => ({ ...prev, line_id: e.target.value }))}
-                    className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-white/80 mb-1 font-mono">KakaoTalk ID</label>
+                  <label className="block text-xs font-mono text-white/50 mb-1.5 uppercase tracking-wider">KakaoTalk ID</label>
                   <input
                     value={editForm.kakao_id}
                     onChange={(e) => setEditForm(prev => ({ ...prev, kakao_id: e.target.value }))}
-                    className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 font-mono text-sm text-white focus:border-[#E11D48]/50 focus:outline-none focus:ring-1 focus:ring-[#E11D48]/20 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => setEditingProfile(null)}
-                  className="flex-1 rounded border border-white/20 px-4 py-2 font-mono text-white/60 hover:bg-white/5 transition-colors"
+                  className="flex-1 rounded-lg border border-white/[0.08] px-4 py-2 font-mono text-sm text-white/50 hover:bg-white/[0.04] transition-all"
                 >
                   취소
                 </button>
                 <button
                   onClick={handleEditSave}
                   disabled={editSaving}
-                  className="flex-1 rounded bg-[#FF0000] px-4 py-2 font-mono font-bold text-white hover:bg-[#cc0000] disabled:opacity-50"
+                  className="flex-1 rounded-lg bg-[#E11D48] px-4 py-2 font-mono text-sm font-bold text-white hover:bg-[#BE123C] disabled:opacity-50 transition-all"
                 >
                   {editSaving ? '저장 중...' : '저장'}
                 </button>

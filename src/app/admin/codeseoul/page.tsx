@@ -39,18 +39,18 @@ export default function AdminCodeseoulPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4 mb-8">
+      <div className="flex flex-wrap gap-2 border-b border-white/[0.06] pb-4 mb-8">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded font-mono text-sm transition-colors ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-sm transition-all ${
               activeTab === id
-                ? 'bg-[#FF0000] text-white'
-                : 'border border-white/10 hover:border-[#FF0000]/50 text-white/80'
+                ? 'bg-[#E11D48] text-white shadow-sm shadow-[#E11D48]/20'
+                : 'border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-[#E11D48]/30 text-white/60 hover:text-white/90'
             }`}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-3.5 h-3.5" />
             {label}
           </button>
         ))}

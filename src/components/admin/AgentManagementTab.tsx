@@ -175,7 +175,7 @@ export function AgentManagementTab() {
         <h2 className="text-lg font-mono font-bold">에이전트 관리</h2>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2 rounded bg-[#FF0000] text-white font-mono text-sm hover:bg-[#cc0000] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded bg-[#E11D48] text-white font-mono text-sm hover:bg-[#cc0000] transition-colors"
         >
           <Plus className="w-4 h-4" />
           에이전트 등록
@@ -212,7 +212,7 @@ export function AgentManagementTab() {
                     <td className="py-3 px-4 font-mono text-sm">{agent.name}</td>
                     <td className="py-3 px-4 font-mono text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#FF0000] font-bold">{agent.agent_code}</span>
+                        <span className="text-[#E11D48] font-bold">{agent.agent_code}</span>
                         <CopyButton text={agent.agent_code} />
                       </div>
                     </td>
@@ -287,13 +287,13 @@ export function AgentManagementTab() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-mono text-white/80 mb-2">
-                  이름 <span className="text-[#FF0000]">*</span>
+                  이름 <span className="text-[#E11D48]">*</span>
                 </label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#FF0000] focus:outline-none"
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#E11D48] focus:outline-none"
                   placeholder="에이전트 이름"
                 />
               </div>
@@ -307,7 +307,7 @@ export function AgentManagementTab() {
                     type="text"
                     value={formCode}
                     readOnly
-                    className="flex-1 rounded border border-white/20 bg-black/30 px-4 py-2 font-mono text-[#FF0000] font-bold cursor-not-allowed"
+                    className="flex-1 rounded border border-white/20 bg-black/30 px-4 py-2 font-mono text-[#E11D48] font-bold cursor-not-allowed"
                   />
                   {!editingAgent && (
                     <button
@@ -329,7 +329,7 @@ export function AgentManagementTab() {
                   type="email"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#FF0000] focus:outline-none"
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#E11D48] focus:outline-none"
                   placeholder="agent@example.com"
                 />
               </div>
@@ -342,13 +342,13 @@ export function AgentManagementTab() {
                   type="text"
                   value={formPhone}
                   onChange={(e) => setFormPhone(e.target.value)}
-                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#FF0000] focus:outline-none"
+                  className="w-full rounded border border-white/20 bg-black/50 px-4 py-2 font-mono text-white focus:border-[#E11D48] focus:outline-none"
                   placeholder="010-0000-0000"
                 />
               </div>
 
               {formError && (
-                <p className="text-sm text-[#FF0000] font-mono">{formError}</p>
+                <p className="text-sm text-[#E11D48] font-mono">{formError}</p>
               )}
 
               <div className="flex justify-end gap-3 pt-4">
@@ -361,7 +361,7 @@ export function AgentManagementTab() {
                 <button
                   onClick={handleSubmit}
                   disabled={formLoading}
-                  className="flex items-center gap-2 px-4 py-2 rounded bg-[#FF0000] text-white font-mono text-sm hover:bg-[#cc0000] disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded bg-[#E11D48] text-white font-mono text-sm hover:bg-[#cc0000] disabled:opacity-50 transition-colors"
                 >
                   {formLoading ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
