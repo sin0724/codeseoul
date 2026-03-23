@@ -86,8 +86,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <div className="w-5 h-5 border border-white/10 border-t-[#E11D48] rounded-full animate-spin" />
+        <p className="text-xs font-mono text-white/25 tracking-widest">LOADING</p>
       </div>
     );
   }
@@ -119,8 +120,8 @@ export default function DashboardPage() {
         )}
       </div>
       {campaigns.length === 0 ? (
-        <div className="rounded border border-white/10 bg-white/5 p-12 text-center">
-          <p className="text-white/50 font-mono">{zhTW.noMissions}</p>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-16 text-center">
+          <p className="text-sm font-mono text-white/30 tracking-wider">{zhTW.noMissions}</p>
         </div>
       ) : (
         <>

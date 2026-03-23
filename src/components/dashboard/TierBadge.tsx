@@ -18,7 +18,7 @@ export function TierBadge({ tier, size = 'md', className = '' }: TierBadgeProps)
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-[#FF0000]/40 bg-[#FF0000]/10 font-mono font-bold text-[#FF0000] ${sizeClass} ${className}`}
+      className={`inline-flex items-center rounded-full border border-[#E11D48]/40 bg-[#E11D48]/10 font-mono font-bold text-[#E11D48] ${sizeClass} ${className}`}
       title={info.id}
     >
       {info.id}

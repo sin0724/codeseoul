@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
-import { JetBrains_Mono } from 'next/font/google';
+import { JetBrains_Mono, Inter } from 'next/font/google';
 import './globals.css';
 
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 const jetbrainsMono = JetBrains_Mono({
-  variable: '--font-geist-mono',
+  variable: '--font-mono',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -21,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body className={`${jetbrainsMono.variable} font-mono antialiased bg-black text-white`}>
+    <html lang="zh-TW">
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-black text-white`}>
         {children}
       </body>
     </html>

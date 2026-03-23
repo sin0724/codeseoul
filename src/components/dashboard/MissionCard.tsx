@@ -2,23 +2,23 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronRight, Instagram, Youtube } from 'lucide-react';
+import { ChevronRight, Instagram, Youtube, Calendar, Users } from 'lucide-react';
 import type { Campaign } from '@/lib/codeseoul/types';
 import { zhTW, formatFollowerTiersZh, t } from '@/messages/kol/zh-TW';
 
 function PlatformBadge({ platform }: { platform?: string | null }) {
   if (platform === 'youtube') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-600/20 text-red-500 text-xs font-mono">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 text-xs font-mono tracking-wide border border-red-500/20">
         <Youtube className="w-3 h-3" />
-        YT
+        YouTube
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-pink-500/20 text-pink-400 text-xs font-mono">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 text-xs font-mono tracking-wide border border-pink-500/20">
       <Instagram className="w-3 h-3" />
-      IG
+      Instagram
     </span>
   );
 }
@@ -43,54 +43,82 @@ export function MissionCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: index * 0.04, duration: 0.4, ease: 'easeOut' }}
       className="h-full"
     >
-      <Link href={`/dashboard/missions/${campaign.id}`} className="block h-full">
-        <div className="group h-full min-h-[180px] rounded border border-white/10 bg-white/5 p-6 transition-all hover:border-[#FF0000]/50 hover:bg-[#FF0000]/5 flex flex-col">
-          <div className="flex items-start justify-between gap-4 flex-1 min-h-0">
-            {(campaign as { brand_image_url?: string }).brand_image_url && (
-              <img
-                src={(campaign as { brand_image_url?: string }).brand_image_url!}
-                alt={campaign.brand_name}
-                className="w-16 h-16 object-contain rounded border border-white/10 shrink-0"
-              />
-            )}
-            <div className="min-w-0 flex-1 flex flex-col gap-2">
-              <div className="flex items-center gap-2 shrink-0">
-                <p className="text-xs text-[#FF0000] font-mono">
+      <Link href={`/dashboard/missions/${campaign.id}`} className="block h-full group">
+        <div className="glass-card rounded-xl p-5 h-full min-h-[200px] flex flex-col cursor-pointer">
+
+          {/* 상단: 브랜드 이미지 + 플랫폼 배지 */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              {(campaign as { brand_image_url?: string }).brand_image_url ? (
+                <div className="w-12 h-12 rounded-lg overflow-hidden border border-white/10 group-hover:border-[#E11D48]/30 transition-colors flex-shrink-0 bg-white/5">
+                  <img
+                    src={(campaign as { brand_image_url?: string }).brand_image_url!}
+                    alt={campaign.brand_name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-lg border border-white/10 bg-white/5 flex-shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p className="text-xs font-mono text-[#E11D48] tracking-wider uppercase truncate">
                   {campaign.brand_name}
                 </p>
-                <PlatformBadge platform={campaign.platform} />
+                <div className="mt-0.5">
+                  <PlatformBadge platform={campaign.platform} />
+                </div>
               </div>
-              <h2 className="font-bold text-white font-mono line-clamp-2 min-h-[2.75rem] shrink-0">
-                {campaign.title}
-              </h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-0 text-sm text-white/60 shrink-0">
-                <span className="whitespace-nowrap">{campaign.payout_amount.toLocaleString()} TWD</span>
-                <span className="whitespace-nowrap">{zhTW.deadline}: {deadline}</span>
-              </div>
-              {campaign.follower_tiers && campaign.follower_tiers.length > 0 ? (
-                <p className="text-xs text-[#FF0000]/90 font-mono shrink-0 min-h-[1.25rem]">
-                  {zhTW.applyEligible}: {formatFollowerTiersZh(campaign.follower_tiers)}
-                </p>
-              ) : (
-                <span className="block min-h-[1.25rem] shrink-0" aria-hidden />
-              )}
-              {(quota != null || applicantsCount > 0 || selectedCount > 0) ? (
-                <p className="text-xs text-white/50 font-mono shrink-0 min-h-[1.25rem]">
-                  {quota != null ? `${applicantsCount}/${quota}` : applicantsCount > 0 ? String(applicantsCount) : '-'}
-                  {selectedCount > 0 && (
-                    <span className="ml-2 text-[#FF0000]">{t('selectedCount', { n: selectedCount })}</span>
-                  )}
-                </p>
-              ) : (
-                <span className="block min-h-[1.25rem] shrink-0" aria-hidden />
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/25 group-hover:text-[#E11D48]/70 transition-colors flex-shrink-0 mt-1" />
+          </div>
+
+          {/* 미션 제목 */}
+          <h2 className="text-sm font-semibold text-white leading-snug line-clamp-2 mb-3 flex-1">
+            {campaign.title}
+          </h2>
+
+          {/* 하단 메타 정보 */}
+          <div className="space-y-2 mt-auto">
+            {/* 원고료 */}
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-mono font-bold text-[#E11D48]">
+                {campaign.payout_amount.toLocaleString()}
+                <span className="text-xs text-[#E11D48]/70 ml-1">TWD</span>
+              </span>
+            </div>
+
+            <div className="h-px bg-white/5" />
+
+            {/* 마감일 + 지원자 수 */}
+            <div className="flex items-center gap-3 text-xs text-white/40">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span className="font-mono">{deadline}</span>
+              </span>
+              {(quota != null || applicantsCount > 0) && (
+                <span className="flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  <span className="font-mono">
+                    {quota != null ? `${applicantsCount}/${quota}` : applicantsCount}
+                    {selectedCount > 0 && (
+                      <span className="text-[#E11D48]/80 ml-1">{t('selectedCount', { n: selectedCount })}</span>
+                    )}
+                  </span>
+                </span>
               )}
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-[#FF0000] transition-colors shrink-0 mt-0.5" />
+
+            {/* 팔로워 티어 요건 */}
+            {campaign.follower_tiers && campaign.follower_tiers.length > 0 && (
+              <p className="text-xs font-mono text-[#E11D48]/60 truncate">
+                {zhTW.applyEligible}: {formatFollowerTiersZh(campaign.follower_tiers)}
+              </p>
+            )}
           </div>
         </div>
       </Link>
